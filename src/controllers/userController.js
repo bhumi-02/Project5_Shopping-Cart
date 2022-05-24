@@ -234,15 +234,13 @@ const updateData= async function(req,res){
             }
         }
 
-       
-
         if(body.lname){
             if(!stringRegex.test(body.lname)){
                 return res.status(400).send({Status: false , message:"last name is not valid"})  
             }
         }
 
-        //---------Email and Phone validation -------------------------------------------------------------//
+        //-----------------------------------if user wants to update the Email/Phone ---------------------------------------------//
         if(body.email){
             if(!EmailRegex.test(body.email)){
                 return res.status(400).send({Status: false , message:"email is not valid"})  
@@ -254,7 +252,7 @@ const updateData= async function(req,res){
             }
         }
         
-        //---------Email and Phone uniqcheck -------------------------------------------------------------//
+        //---------------------------------------Email and Phone uniqcheck -----------------------------------------//
 
         if(body.email || body.phone){
             let uniqueCheck= await userModel.findOne({$or:[{email:body.email.toLowerCase().trim()},{phone:body.phone}]})
@@ -267,7 +265,7 @@ const updateData= async function(req,res){
                 }
             }
         }
-        //------------------------------------------------------------------------------------------------------------//
+        //----------------------------------If user wants to update the Password--------------------------------------------------------//
        
         if(body.password){
             if(!Passwordregex.test(body.password)){
@@ -285,6 +283,8 @@ const updateData= async function(req,res){
             }
            
             let {shipping,billing}=body.address
+
+        //-------------------------If user wants to Update Shipping Address ------------------------------------//
 
             if(shipping){
             
@@ -306,6 +306,7 @@ const updateData= async function(req,res){
                     } 
                 }
             }
+        //--------------------If User wants to Update Billing Address -----------------------------------------------//
             if(billing){
                 if (typeof billing != "object") {
                     return res.status(400).send({ status: false, message: "address should be an object" })
@@ -329,9 +330,7 @@ const updateData= async function(req,res){
             }  
         }
 
-        
-        //-------------------------------------------------------------------------------------------------------------------//
-        
+        //-------------------------------------If user wants to update Profile Image----------------------------------------//
         
         if(body.profileImage){
             if(typeof body.profileImage==="string"){
@@ -339,27 +338,24 @@ const updateData= async function(req,res){
             }
         }
         if(files && files.length>0){
+
             let uploadedFileURL= await uploadFile( files[0] )
             body.profileImage=uploadedFileURL
+
             let updateProfile= await userModel.findByIdAndUpdate({_id:User_id},{fname:body.fname, lname:body.lname,password:body.password,email:body.email,phone:body.phone,profileImage:body.profileImage, address:body.address},{new:true})
 
-            return res.status(201).send({Status:true, data:updateProfile})
+            return res.status(200).send({Status:true, data:updateProfile})
         }
-    //---------------------------------------------------------------------------------------------------------------//
+    //----------------------------------If User does not want update Profile Image------------------------------------------------------------//
        
     let changeProfile= await userModel.findByIdAndUpdate({_id:User_id},{fname:body.fname, lname:body.lname,password:body.password,email:body.email,phone:body.phone,address:body.address},{new:true})
 
-    console.log("chalo:   ",changeProfile)
-
-    return res.status(201).send({Status:true, data:changeProfile})
-
-
+    return res.status(200).send({Status:true, data:changeProfile})
 
     }catch(err){
         return res.status(500).send({Status: false , message:err.message})  
     }
 }
-
 
 
 module.exports={createUser,updateData}
