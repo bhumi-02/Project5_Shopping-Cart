@@ -11,7 +11,7 @@ let EmailRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9._]{1,}@[A-Za-z1-9]{2,15}[.]{1}[A-Za-
 let pinRegex= /^[1-9]{1}[0-9]{5}$/
 let mobileRegex= /^[6-9]{1}[0-9]{9}$/
 
-let streetRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9/ ,]{1,10000}$/
+let streetRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9/ ,-]{1,10000}$/
 let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
 
 //---------------------------------------------------------------------------------//
@@ -234,6 +234,8 @@ const updateData= async function(req,res){
             }
         }
 
+       
+
         if(body.lname){
             if(!stringRegex.test(body.lname)){
                 return res.status(400).send({Status: false , message:"last name is not valid"})  
@@ -251,7 +253,7 @@ const updateData= async function(req,res){
                 return res.status(400).send({Status: false , message:"mobile number is not valid"})  
             }
         }
-
+        
         //---------Email and Phone uniqcheck -------------------------------------------------------------//
 
         if(body.email || body.phone){
@@ -266,16 +268,13 @@ const updateData= async function(req,res){
             }
         }
         //------------------------------------------------------------------------------------------------------------//
-
-  
-        //------------------------------------------------------------------------------------------------------------//
+       
         if(body.password){
             if(!Passwordregex.test(body.password)){
                 return res.status(400).send({Status: false , message:"Please enter the valid password"})  
-            }  
+            }
+            body.password= await bcrypt.hash(body.password,10) 
         }
-        body.password= await bcrypt.hash(body.password,10)
-
         //------------------------------------------Address validation------------------------------------------------------------------//
         
         if(body.address){
@@ -306,7 +305,6 @@ const updateData= async function(req,res){
                         return res.status(400).send({Status: false , message:"Please enter the valid shipping pin code"}) 
                     } 
                 }
- 
             }
             if(billing){
                 if (typeof billing != "object") {
@@ -323,19 +321,18 @@ const updateData= async function(req,res){
                         return res.status(400).send({Status: false , message:"Please enter the valid billing city address"}) 
                     }
                 }
-
                 if(billing.pincode){
                     if(!pinRegex.test(billing.pincode)){
                         return res.status(400).send({Status: false , message:"Please enter the valid billing pin code"}) 
                     }  
                 }
-
-            }
-            
+            }  
         }
+
+        
         //-------------------------------------------------------------------------------------------------------------------//
         
-        body.password= await bcrypt.hash(body.password,10)
+        
         if(body.profileImage){
             if(typeof body.profileImage==="string"){
                 return res.status(400).send({Status: false , message:"Please upload the image"})   
@@ -351,6 +348,8 @@ const updateData= async function(req,res){
     //---------------------------------------------------------------------------------------------------------------//
        
     let changeProfile= await userModel.findByIdAndUpdate({_id:User_id},{fname:body.fname, lname:body.lname,password:body.password,email:body.email,phone:body.phone,address:body.address},{new:true})
+
+    console.log("chalo:   ",changeProfile)
 
     return res.status(201).send({Status:true, data:changeProfile})
 

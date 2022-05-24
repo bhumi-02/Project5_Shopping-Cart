@@ -71,21 +71,19 @@ const login= async function(req,res){
 const Mid1 = async function (req, res, next) {
     try {
       
-        let token = req.headers.authorization
+        // let token = req.headers.authorization
 
+        let headers = req.headers
+        let token= headers["x-api-key"] || headers["X-API-KEY"]
         if (!token) {
             return res.status(400).send({ Status: false, message: " Please enter the token" })
         }
 
-        let user_token= token.split(" ")
-
-        console.log("help of token:   ",user_token)
 
         try {
-            let decodedToken = jwt.verify("Bearer"+token, "FunctionUp Group40")
+            let decodedToken = jwt.verify(token, "FunctionUp Group40")
             console.log("help:    ",decodedToken)
 
-            return
             if (decodedToken) {
                 req.userId = decodedToken.UserId            // sending UserId in a request, means exporting this decodedToken.UserId 
                 return next()
