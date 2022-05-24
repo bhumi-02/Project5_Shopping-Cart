@@ -66,22 +66,21 @@ const login= async function(req,res){
 
 
 
-
-
 const Mid1 = async function (req, res, next) {
     try {
       
-        // let token = req.headers.authorization
+        let token = req.headers["authorization"]
 
-        let headers = req.headers
-        let token= headers["x-api-key"] || headers["X-API-KEY"]
         if (!token) {
             return res.status(400).send({ Status: false, message: " Please enter the token" })
         }
 
+        let user_token= token.split(" ")
+
+        console.log("help:    ",user_token[1])
 
         try {
-            let decodedToken = jwt.verify(token, "FunctionUp Group40")
+            let decodedToken = jwt.verify(user_token[1], "FunctionUp Group40")
             console.log("help:    ",decodedToken)
 
             if (decodedToken) {
