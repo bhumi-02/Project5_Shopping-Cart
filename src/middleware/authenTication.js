@@ -34,7 +34,7 @@ const login= async function(req,res){
         body.email= body.email.toLowerCase().trim()
 
 
-        body.password= await bcrypt.hash(body.password,10)
+        body.password= await bcrypt.compare(body.password,10)
 //--------------------------------------------------------------------------------------------//
         console.log("password:    ",body.password)
         
@@ -50,7 +50,7 @@ const login= async function(req,res){
 
         }, 'FunctionUp Group40', { expiresIn: '86400s' });    // token expiry for 24hrs
 
-        res.setHeader("x-api-key", token);
+        res.setHeader("Bearer Token", token);
         let result={}
         result={userId,token}
         return res.status(201).send({ status: true, message: "User login successfull", data: result})

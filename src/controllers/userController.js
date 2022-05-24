@@ -93,16 +93,7 @@ const createUser= async function(req,res){
                 return res.status(400).send({Status: false , message:"This Phone has been used already"}) 
             }
         }
-        //------------------------------------------------------------------------------------------------------------//
-        if(files.length===0){
-            return res.status(400).send({Status: false , message:"Sorry you have not uploaded the file"})  
-        }
-        if(!files[0].fieldname){
-            return res.status(400).send({Status: false , message:"Please upload the profile image"})  
-        }
-        let uploadedFileURL= await uploadFile( files[0] )
-  
-        //------------------------------------------------------------------------------------------------------------//
+
         if(!body.password){
             return res.status(400).send({Status: false , message:"Please enter the password"})  
         }
@@ -177,10 +168,30 @@ const createUser= async function(req,res){
             }
         
         //---------------Encrypting the password------------------------------------------------------------------------//
-        body.password= await bcrypt.hash(body.password,10)
+        // body.password= await bcrypt.hash(body.password,10)
+                //------------------------------------------------------------------------------------------------------------//
+                if(files.length===0){
+                    return res.status(400).send({Status: false , message:"Sorry you have not uploaded the file"})  
+                }
+                if(!files[0].fieldname){
+                    return res.status(400).send({Status: false , message:"Please upload the profile image"})  
+                }
+                let uploadedFileURL= await uploadFile( files[0] )
+          
+                //------------------------------------------------------------------------------------------------------------//
         body.profileImage=uploadedFileURL
+        body.password= await bcrypt.hash(body.password,10)
 
         const createUser= await userModel.create(body)
+
+      
+        
+
+    //    const {fname,lname,email,profileImage,address,phone,password} = body
+    //    let _id=createUser._id
+    //    let createdAt=createUser.createdAt
+    //    let updatedAt=createUser.updatedAt
+    //    let result = {_id,fname,lname,email,profileImage,address,phone,password,createdAt,updatedAt}
 
         return res.status(201).send({Status:true, data:createUser})
 
@@ -202,7 +213,7 @@ const updateData= async function(req,res){
         if(User_id.length !=24){
             return res.status(400).send({Status:false, message: "Please enater the valid user id in params of 24 digit"}) 
         }
-
+ //-------------Authorization---------------------------------------------------------------------------//
         let CheckUser = await userModel.findById({_id:User_id})
             if(CheckUser){
                 if(CheckUser._id !=userToken){
@@ -212,7 +223,7 @@ const updateData= async function(req,res){
             else{
                 return res.status(400).send({Status:false, message: "User id is not valid"}) 
             }
-        
+  //-----------------------------------------------------------------------------------------------------------//      
 
         if(Object.keys(body).length===0){
             return res.status(400).send({Status: false , message:"Please provide the data"})
