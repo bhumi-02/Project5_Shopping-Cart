@@ -50,14 +50,13 @@ let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
 
 const createUser= async function(req,res){
     try{
-        let body = req.body
+        let body = JSON.parse(JSON.stringify(req.body))
         let files= req.files
-        console.log("okay:   ",body)
-        console.log("files:   ",files)
 
         if(Object.keys(body).length===0){
             return res.status(400).send({Status: false , message:"Please provide the data"})
         }
+         
         if(!body.fname){
             return res.status(400).send({Status: false , message:"Please enter the first name"})
         }
@@ -88,10 +87,10 @@ const createUser= async function(req,res){
         let uniqueCheck= await userModel.findOne({$or:[{email:body.email.toLowerCase()},{phone:body.phone}]})
         if(uniqueCheck){
             if(uniqueCheck.email){
-                return res.status(400).send({Status: false , message:"This Phone has been used alreay"})    
+                return res.status(400).send({Status: false , message:"This Phone has been used already"})    
             }
             if(uniqueCheck.phone){
-                return res.status(400).send({Status: false , message:"This Phone has been used alreay"}) 
+                return res.status(400).send({Status: false , message:"This Phone has been used already"}) 
             }
         }
         //------------------------------------------------------------------------------------------------------------//
@@ -116,19 +115,13 @@ const createUser= async function(req,res){
             return res.status(400).send({Status: false , message:"Please enter the address"})  
         }
 
+        body.address = JSON.parse(body.address)
 
-        address=JSON.parse(body.address)
-
-        if (typeof address != "object") {
-            return res.status(400).send({ status: false, message: "address should be an object" })
+        if(Object.keys(body.address).length===0){
+            return res.status(400).send({Status: false , message:"Please provide the address data"})  
         }
        
-     
-
-        let {shipping,billing}=address
-       
-
-        if(address){
+        let {shipping,billing}=body.address
        
             if(!shipping){
                 return res.status(400).send({Status: false , message:"Please enter the shipping address"}) 
@@ -182,9 +175,14 @@ const createUser= async function(req,res){
                     return res.status(400).send({Status: false , message:"Please enter the valid billing pin code"}) 
                 }  
             }
-        }
+        
+        //---------------Encrypting the password------------------------------------------------------------------------//
+        body.password= await bcrypt.hash(body.password,10)
+        body.profileImage=uploadedFileURL
 
+        const createUser= await userModel.create(body)
 
+        return res.status(201).send({Status:true, data:createUser})
 
 
     }catch(err){
@@ -192,4 +190,166 @@ const createUser= async function(req,res){
     }
 }
 
-module.exports={createUser}
+
+
+const updateData= async function(req,res){
+    try{
+        let body=req.body
+        let files=req.files
+        let User_id= req.params.userId
+        const userToken= req.userId
+
+        if(User_id.length !=24){
+            return res.status(400).send({Status:false, message: "Please enater the valid user id in params of 24 digit"}) 
+        }
+
+        let CheckUser = await userModel.findById({_id:User_id})
+            if(CheckUser){
+                if(CheckUser._id !=userToken){
+                    return res.status(400).send({Status:false, message: "Sorry you are not authorise person"})
+                }
+            }
+            else{
+                return res.status(400).send({Status:false, message: "User id is not valid"}) 
+            }
+        
+
+        if(Object.keys(body).length===0){
+            return res.status(400).send({Status: false , message:"Please provide the data"})
+        }
+        if(body.fname){
+            if(!stringRegex.test(body.fname)){
+                return res.status(400).send({Status: false , message:"first name is not valid"})  
+            }
+        }
+
+        if(body.lname){
+            if(!stringRegex.test(body.lname)){
+                return res.status(400).send({Status: false , message:"last name is not valid"})  
+            }
+        }
+
+        //---------Email and Phone validation -------------------------------------------------------------//
+        if(body.email){
+            if(!EmailRegex.test(body.email)){
+                return res.status(400).send({Status: false , message:"email is not valid"})  
+            }
+        }
+        if(body.phone){
+            if(!mobileRegex.test(body.phone)){
+                return res.status(400).send({Status: false , message:"mobile number is not valid"})  
+            }
+        }
+
+        //---------Email and Phone uniqcheck -------------------------------------------------------------//
+
+        if(body.email || body.phone){
+            let uniqueCheck= await userModel.findOne({$or:[{email:body.email.toLowerCase().trim()},{phone:body.phone}]})
+            if(uniqueCheck){
+                if(uniqueCheck.email){
+                    return res.status(400).send({Status: false , message:"This Phone has been used already"})    
+                }
+                if(uniqueCheck.phone){
+                    return res.status(400).send({Status: false , message:"This Phone has been used alreay"}) 
+                }
+            }
+        }
+        //------------------------------------------------------------------------------------------------------------//
+
+  
+        //------------------------------------------------------------------------------------------------------------//
+        if(body.password){
+            if(!Passwordregex.test(body.password)){
+                return res.status(400).send({Status: false , message:"Please enter the valid password"})  
+            }  
+        }
+        body.password= await bcrypt.hash(body.password,10)
+
+        //------------------------------------------Address validation------------------------------------------------------------------//
+        
+        if(body.address){
+            body.address = JSON.parse(body.address)
+
+            if(Object.keys(body.address).length===0){
+                return res.status(400).send({Status: false , message:"Please provide the address data"})  
+            }
+           
+            let {shipping,billing}=body.address
+
+            if(shipping){
+            
+                if(shipping.street){
+                    if(!streetRegex.test(shipping.street)){
+                        return res.status(400).send({Status: false , message:"Please enter the valid shipping street address"}) 
+                    }  
+                }
+              
+                if(shipping.city){
+                    if(!streetRegex.test(shipping.city)){
+                        return res.status(400).send({Status: false , message:"Please enter the valid shipping city address"}) 
+                    }
+                }
+
+                if(shipping.pincode){
+                    if(!pinRegex.test(shipping.pincode)){
+                        return res.status(400).send({Status: false , message:"Please enter the valid shipping pin code"}) 
+                    } 
+                }
+ 
+            }
+            if(billing){
+                if (typeof billing != "object") {
+                    return res.status(400).send({ status: false, message: "address should be an object" })
+                }
+                if(billing.street){
+                    if(!streetRegex.test(billing.street)){
+                        return res.status(400).send({Status: false , message:"Please enter the valid billing street address"}) 
+                    }
+                }
+
+                if(billing.city){
+                    if(!streetRegex.test(billing.city)){
+                        return res.status(400).send({Status: false , message:"Please enter the valid billing city address"}) 
+                    }
+                }
+
+                if(billing.pincode){
+                    if(!pinRegex.test(billing.pincode)){
+                        return res.status(400).send({Status: false , message:"Please enter the valid billing pin code"}) 
+                    }  
+                }
+
+            }
+            
+        }
+        //-------------------------------------------------------------------------------------------------------------------//
+        
+        body.password= await bcrypt.hash(body.password,10)
+        if(body.profileImage){
+            if(typeof body.profileImage==="string"){
+                return res.status(400).send({Status: false , message:"Please upload the image"})   
+            }
+        }
+        if(files && files.length>0){
+            let uploadedFileURL= await uploadFile( files[0] )
+            body.profileImage=uploadedFileURL
+            let updateProfile= await userModel.findByIdAndUpdate({_id:User_id},{fname:body.fname, lname:body.lname,password:body.password,email:body.email,phone:body.phone,profileImage:body.profileImage, address:body.address},{new:true})
+
+            return res.status(201).send({Status:true, data:updateProfile})
+        }
+    //---------------------------------------------------------------------------------------------------------------//
+       
+    let changeProfile= await userModel.findByIdAndUpdate({_id:User_id},{fname:body.fname, lname:body.lname,password:body.password,email:body.email,phone:body.phone,address:body.address},{new:true})
+
+    return res.status(201).send({Status:true, data:changeProfile})
+
+
+
+    }catch(err){
+        return res.status(500).send({Status: false , message:err.message})  
+    }
+}
+
+
+
+module.exports={createUser,updateData}
