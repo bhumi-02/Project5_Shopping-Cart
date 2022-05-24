@@ -167,25 +167,35 @@ const createUser = async function (req, res) {
             }
         }
 
-        //---------------Encrypting the password------------------------------------------------------------------------//
-        // body.password= await bcrypt.hash(body.password,10)
-        //------------------------------------------------------------------------------------------------------------//
+        //------------------------------------Profile Image Validation------------------------------------------------------//
+        if (body.profileImage) {
+            if (typeof body.profileImage === "string") {
+                return res.status(400).send({ Status: false, message: "Please upload the image" })
+            }
+        }
         if (files.length === 0) {
             return res.status(400).send({ Status: false, message: "Sorry you have not uploaded the file" })
         }
         if (!files[0].fieldname) {
             return res.status(400).send({ Status: false, message: "Please upload the profile image" })
         }
+
         let uploadedFileURL = await uploadFile(files[0])
 
-        //------------------------------------------------------------------------------------------------------------//
+        if(!uploadedFileURL){
+            return res.status(400).send({ Status: false, message: "Image could not be upload" })
+        }
+
         body.profileImage = uploadedFileURL
+
+        //------------------------------------------Encrypting the password------------------------------------------------------//
+
         body.password = await bcrypt.hash(body.password, 10)
 
+        //----------------------------------------User Creation-------------------------------------------------------//
         const createUser = await userModel.create(body)
 
         return res.status(201).send({ Status: true, data: createUser })
-
 
     } catch (err) {
         return res.status(500).send({ Status: false, message: err.message })
