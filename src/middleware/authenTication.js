@@ -81,7 +81,8 @@ const Mid1 = async function (req, res, next) {
 
         try {
             let decodedToken = jwt.verify(user_token[1], "FunctionUp Group40")
-            console.log("help:    ",decodedToken)
+            
+            console.log("decode token:    ",decodedToken)
 
             if (decodedToken) {
                 req.userId = decodedToken.UserId            // sending UserId in a request, means exporting this decodedToken.UserId 
