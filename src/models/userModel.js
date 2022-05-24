@@ -5,7 +5,7 @@ const mongoose=require('mongoose')
 const userSchema= new mongoose.Schema({
     fname: {type: String, required:"First Name is Required",trim:true},
   lname: {type: String, required:"Last Name is Required",trim:true},
-  email: {type: String, required:"Email is Required", unique:true,trim:true},
+  email: {type: String, required:"Email is Required", unique:true,trim:true,lowercase:true},
   profileImage: {type: String, required:"Profile image is Required",trim:true}, // s3 link
   phone: {type: String, required:"Mobile is Required",unique:true,trim:true}, 
   password: {type: String, required:"Password is Required",minlength:8,maxlength:15,trim:true}, // encrypted password
