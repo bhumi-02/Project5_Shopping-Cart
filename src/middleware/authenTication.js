@@ -33,15 +33,19 @@ const login= async function(req,res){
 //--------------------------------------------------------------------------------------------//
         body.email= body.email.toLowerCase().trim()
 
-
-        body.password= await bcrypt.compare(body.password,10)
 //--------------------------------------------------------------------------------------------//
-        console.log("password:    ",body.password)
+       
         
-        let checkDetail= await userModel.findOne({email:body.email, password:body.password})
+        let checkDetail= await userModel.findOne({email:body.email})
         if(!checkDetail){
-            return res.status(404).send({ Status: false, message: "Could not find the detail of User, Please check your email and password" }) 
+            return res.status(404).send({ Status: false, message: "Could not find the detail of User, Please check your email" }) 
         }
+        let checkPassword = await bcrypt.compare(body.password,checkDetail.password);
+      
+        if (!checkPassword) {
+            return res.status(400).send({ status: false, message: "Password is not correct" });
+          }
+          
         let userId= checkDetail._id
         let token = jwt.sign({
 
@@ -50,7 +54,6 @@ const login= async function(req,res){
 
         }, 'FunctionUp Group40', { expiresIn: '86400s' });    // token expiry for 24hrs
 
-        res.setHeader("Bearer Token", token);
         let result={}
         result={userId,token}
         return res.status(201).send({ status: true, message: "User login successfull", data: result})
