@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
+const bearerToken = require('bearer-token')
 
 
 //-------------------------------------------------------------------------------------------//
@@ -45,7 +46,7 @@ const login= async function(req,res){
         if (!checkPassword) {
             return res.status(400).send({ status: false, message: "Password is not correct" });
           }
-          
+
         let userId= checkDetail._id
         let token = jwt.sign({
 
@@ -70,15 +71,18 @@ const login= async function(req,res){
 const Mid1 = async function (req, res, next) {
     try {
       
-        let header = req.headers
-
-        let token = header['Bearer Token']
+        let token = req.headers.authorization
 
         if (!token) {
             return res.status(400).send({ Status: false, message: " Please enter the token" })
         }
+
+        let user_token= token.split(" ")
+
+        console.log("help of token:   ",user_token)
+
         try {
-            let decodedToken = jwt.verify(token, "FunctionUp Group40")
+            let decodedToken = jwt.verify("Bearer"+token, "FunctionUp Group40")
             console.log("help:    ",decodedToken)
 
             return
