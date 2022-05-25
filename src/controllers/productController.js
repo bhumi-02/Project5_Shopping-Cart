@@ -157,11 +157,11 @@ const createProduct=async function(req,res){
     }
     //----------validation for availble sizes---------------------------------------------------//
 
-    // if(availableSizes){
-    //     if(availableSizes.length===0){
-    //         return res.status(400).send({status:false,message:"plzz provide the product size"})
-    //     }
-    // }
+    if(validForEnum(availableSizes)){
+        if(availableSizes.length===0){
+            return res.status(400).send({status:false,message:"plzz provide the product size"})
+        }
+    }
     if(files.length>0){
         var profileImage=await uploadFile(files[0])
 
