@@ -94,7 +94,7 @@ const createUser = async function (req, res) {
         let uniqueCheck = await userModel.findOne({ $or: [{ email: body.email.toLowerCase() }, { phone: body.phone }] })
         if (uniqueCheck) {
             if (uniqueCheck.email) {
-                return res.status(400).send({ Status: false, message: "This Phone has been used already" })
+                return res.status(400).send({ Status: false, message: "This email has been used already" })
             }
             if (uniqueCheck.phone) {
                 return res.status(400).send({ Status: false, message: "This Phone has been used already" })
