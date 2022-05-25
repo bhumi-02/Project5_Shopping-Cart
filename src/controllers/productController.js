@@ -1,6 +1,7 @@
  const productModel=require('../models/productModel')
  const bcrypt=require('bcrypt')
  const aws=require('aws-sdk')
+ const currencySymbol=require('currency-symbol-map')
 
 
 //------------------------------------------connection to aws---------------------------------//
@@ -47,13 +48,6 @@ let stringRegex = /^[A-Za-z]{1}[A-Za-z ]{1,1000}$/
 let priceRegex=/^\d+(,\d{3})*(\.\d{1,2})?$/
 
 
-
-
-//-------------------------------------validation ends---------------------------------------------------------//
-
-
-//-------------------------validation for enum-----------------------------------------------------//
-
 const validForEnum=function(value){
     let enumValue=["S","XS","M","X","L","XXL","XL"]
     value=JSON.parse(value)
@@ -64,6 +58,11 @@ const validForEnum=function(value){
     }
     return true
 }
+
+
+
+
+
 //-------------------------------ends-----------------------------------------------------------------//
 
 
@@ -100,7 +99,7 @@ const createProduct=async function(req,res){
      }
      if (!stringRegex.test(title)) {
 
-        return res.status(400).send({ Status: false, message: "last name is not valid" })
+        return res.status(400).send({ Status: false, message: "title name is not valid" })
     }
     let duplicateTitle=await productModel.findOne({title:title})
 
@@ -124,22 +123,62 @@ const createProduct=async function(req,res){
         return res.status(400).send({status:false,message:"price is required"})
     }
     if(!priceRegex.test(price)){
-        return res.status(400).send{status:false,message;"plzz enter valid price"}
-    }
-    if(!currencyId){
-        return res.status(400).send({status:false,message:"concurrency id is required"})
-    }
-    if(!currencyFormat){
-        return res.status(400).send({status:false,message:"concurrency format is required"})
+        return res.status(400).send({status:false,message:"plzz enter valid price"})
     }
 
+
+    if(currencyId){
+        if(currencyId !== "INR"){
+            return res.status(400).send({status : false, message : "Currency ID Must be in INR"})
+        }
+    } else{
+        data.currencyId = "INR"
+    }
+
+    if(currencyFormat){
+        if(currencyId !== "₹"){
+            return res.status(400).send({status : false, message : "currency format must be ₹ "})
+        }
+    } else{
+        data.currencyFormat = "₹"
+    }
+
+    if(isFreeShipping){
+        if(typeof isFreeShipping !== 'boolean'){
+            return res.status(400).send({status : false, message : "is Free Shipping must be a BOOLEAN VALUE"})
+        }
+    }
+   
+    // if(!style){
+    //     return res.status(400).send({status:false,message:" plzz provide style is required"})
+    // }
+    if(!stringRegex.test(style)){
+        return res.status(400).send({status:false,message:"enter valid style"})
+    }
+    //----------validation for availble sizes---------------------------------------------------//
+
+    // if(availableSizes){
+    //     if(availableSizes.length===0){
+    //         return res.status(400).send({status:false,message:"plzz provide the product size"})
+    //     }
+    // }
+    if(files.length>0){
+        var profileImage=await uploadFile(files[0])
+
+    }
+    data.productImage=profileImage
+    data.availableSizes=(availableSizes)
     
+    if(!data.productImage){
+        return res.status(400).send({status:false,message:"productImage is required"})
+    }
 
-
+    const productCreate=await productModel.create(data)
+    return res.status(201).send({status:true,message:"Success",data:productCreate})
 
     }
 
-catch (err) {
+ catch (err) {
     return res.status(500).send({ Status: false, message: err.message })
 }
  
@@ -147,3 +186,4 @@ catch (err) {
 
  
 
+module.exports={createProduct}
