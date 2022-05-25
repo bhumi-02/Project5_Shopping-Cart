@@ -90,17 +90,19 @@ const createUser = async function (req, res) {
             return res.status(400).send({ Status: false, message: "mobile number is not valid" })
         }
         //---------Email and Phone uniqcheck -------------------------------------------------------------//
-
-        let uniqueCheck = await userModel.findOne({ $or: [{ email: body.email.toLowerCase() }, { phone: body.phone }] })
+        let uniqueCheck = await userModel.findOne({ email: body.email.toLowerCase().trim() })
         if (uniqueCheck) {
             if (uniqueCheck.email) {
                 return res.status(400).send({ Status: false, message: "This email has been used already" })
             }
-            if (uniqueCheck.phone) {
-                return res.status(400).send({ Status: false, message: "This Phone has been used already" })
+        }
+        let uniqueCheckPhone = await userModel.findOne({ phone: body.phone })
+        if (uniqueCheckPhone) {
+            if (uniqueCheckPhone.phone) {
+                return res.status(400).send({ Status: false, message: "This phone has been used already" })
             }
         }
-
+        //----------------------------------------------------------------------------------------------------------//
         if (!body.password) {
             return res.status(400).send({ Status: false, message: "Please enter the password" })
         }
@@ -263,15 +265,19 @@ const updateData = async function (req, res) {
         //---------------------------------------Email and Phone uniqcheck -----------------------------------------//
 
         if (body.email || body.phone) {
-            let uniqueCheck = await userModel.findOne({ $or: [{ email: body.email.toLowerCase().trim() }, { phone: body.phone }] })
+            let uniqueCheck = await userModel.findOne({ email: body.email.toLowerCase().trim() })
             if (uniqueCheck) {
                 if (uniqueCheck.email) {
-                    return res.status(400).send({ Status: false, message: "This Phone has been used already" })
-                }
-                if (uniqueCheck.phone) {
-                    return res.status(400).send({ Status: false, message: "This Phone has been used alreay" })
+                    return res.status(400).send({ Status: false, message: "This email has been used already" })
                 }
             }
+            let checkPhone = await userModel.findOne({ phone: body.phone })
+            if (checkPhone){
+
+            if (checkPhone.phone) {
+                return res.status(400).send({ Status: false, message: "This Phone has been used already" })
+            }
+        }
         }
         //----------------------------------If user wants to update the Password--------------------------------------------------------//
 
