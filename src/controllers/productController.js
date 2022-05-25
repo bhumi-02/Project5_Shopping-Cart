@@ -151,10 +151,9 @@ const createProduct=async function(req,res){
         }
     }
 
-   
-    // if(!style){
-    //     return res.status(400).send({status:false,message:" plzz provide style is required"})
-    // }
+    if(style){
+        return res.status(400).send({status:false,message:" plzz provide style "})
+    }
     if(!stringRegex.test(style)){
         return res.status(400).send({status:false,message:"enter valid style"})
     }
