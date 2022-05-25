@@ -77,20 +77,24 @@ const Mid1 = async function (req, res, next) {
 
         let user_token= token.split(" ")
 
-        console.log("help:    ",user_token[1])
-
-        try {
-            let decodedToken = jwt.verify(user_token[1], "FunctionUp Group40")
-            
-            console.log("decode token:    ",decodedToken)
-
-            if (decodedToken) {
-                req.userId = decodedToken.UserId            // sending UserId in a request, means exporting this decodedToken.UserId 
-                return next()
+        //------------------------------------------------------------------------------------------------//
+        jwt.verify(user_token[1],"FunctionUp Group40",{ ignoreExpiration: true },function (err, decoded) {
+            if (err) {
+                return res.status(400).send({status : false, meessage : "token invalid"})
             }
-        }catch (err) {
-            return res.status(400).send({ Status: false, message: err.message })
-        }
+             else {
+
+              //The static Date.now() method returns the number of milliseconds elapsed since January 1, 1970
+            
+              if (Date.now() > decoded.exp * 1000) {
+                return res.status(401).send({status: false,msg: "Session Expired",});
+              }
+              req.userId = decoded.UserId;
+             return next();
+            }});
+
+
+        //-----------------------------------------------------------------------------------------------//
 
     }
     catch (err) {

@@ -255,6 +255,7 @@ const updateData = async function (req, res) {
             if (!EmailRegex.test(body.email)) {
                 return res.status(400).send({ Status: false, message: "email is not valid" })
             }
+            body.email=body.email.toLowerCase().trim()
         }
         if (body.phone) {
             if (!mobileRegex.test(body.phone)) {
@@ -264,8 +265,8 @@ const updateData = async function (req, res) {
 
         //---------------------------------------Email and Phone uniqcheck -----------------------------------------//
 
-        if (body.email || body.phone) {
-            let uniqueCheck = await userModel.findOne({ email: body.email.toLowerCase().trim() })
+         
+            let uniqueCheck = await userModel.findOne({ email:body.email  })
             if (uniqueCheck) {
                 if (uniqueCheck.email) {
                     return res.status(400).send({ Status: false, message: "This email has been used already" })
@@ -278,7 +279,7 @@ const updateData = async function (req, res) {
                 return res.status(400).send({ Status: false, message: "This Phone has been used already" })
             }
         }
-        }
+        
         //----------------------------------If user wants to update the Password--------------------------------------------------------//
 
         if (body.password) {
@@ -379,7 +380,7 @@ const getUser=async function (req,res){
 try{
 
     const userId=req.params.userId
-    const userIdFromToken=req.userId
+    const userIdFromToken= req.userId
     if(!isValidObjectId(userId)){
         return res.status(400).send({status:false,message:"valid userId is required"})
     }
@@ -391,9 +392,6 @@ try{
         return res.status(400).send({status:false,message:"no data found with user Id"})
     
     return res.status(200).send({status:true,message:"user Details",data:userGet})
-
-
-
 
 } catch (err) {
     return res.status(500).send({ Status: false, message: err.message })
