@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel")
 const aws = require("aws-sdk")
 const bcrypt = require('bcrypt');
+const { default: mongoose } = require("mongoose");
 
 
 
@@ -13,6 +14,12 @@ let mobileRegex = /^[6-9]{1}[0-9]{9}$/
 
 let streetRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9/ ,-]{1,10000}$/
 let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
+
+const isValidObjectId=function(ObjectId){
+    return mongoose.Types.ObjectId.isValid(ObjectId)
+}
+
+
 
 //---------------------------------------------------------------------------------//
 
@@ -359,4 +366,42 @@ const updateData = async function (req, res) {
 }
 
 
-module.exports = { createUser, updateData }
+
+//get api
+const getUser=async function (req,res){
+
+try{
+
+    const userId=req.params.userId
+    const userIdFromToken=req.userId
+    if(!isValidObjectId(userId)){
+        return res.status(400).send({status:false,message:"valid userId is required"})
+    }
+    if(userIdFromToken!=userId){
+        return res.status(401).send({status:false,message:"unauthorized access"})
+    }
+    const userGet=await userModel.findOne({_id:userId})
+    if(!userGet)
+        return res.status(400).send({status:false,message:"no data found with user Id"})
+    
+    return res.status(200).send({status:true,message:"user Details",data:userGet})
+
+
+
+
+} catch (err) {
+    return res.status(500).send({ Status: false, message: err.message })
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+module.exports = { createUser, updateData,getUser }
