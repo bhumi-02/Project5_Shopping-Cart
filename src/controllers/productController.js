@@ -85,7 +85,7 @@ const createProduct=async function(req,res){
 
         let data=req.body
         let files=req.files
-        if(Object.keys(data)==0)
+        if(Object.keys(data).length==0)
         {
             return res.status(400).send({status:false,message:"plzz enter some  data "})
         }
@@ -151,9 +151,9 @@ const createProduct=async function(req,res){
         }
     }
 
-    if(style){
-        return res.status(400).send({status:false,message:" plzz provide style "})
-    }
+    // if(style){
+    //     return res.status(400).send({status:false,message:" plzz provide style "})
+    // }
     if(!stringRegex.test(style)){
         return res.status(400).send({status:false,message:"enter valid style"})
     }
@@ -165,6 +165,10 @@ const createProduct=async function(req,res){
             return res.status(400).send({status:false,message:"plzz provide the product size"})
         }
     }
+
+    // if(installments){
+    //     return res.status(400).send({status:false,message:"enter installment"})
+    // }
     if(!numberPattern.test(installments)){
         return res.status(400).send({status:false,message:"plzz provide valid installments"})
     }
