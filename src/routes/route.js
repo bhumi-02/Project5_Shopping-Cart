@@ -15,6 +15,7 @@ router.get("/user/:userId/profile",middleWare.Mid1,userController.getUser)
 
 //--------------product-api-------------------------------------------------------//
 router.post("/products",productController.createProduct)
+router.delete("/products/:productId",productController.deleteProduct)
 
 
 

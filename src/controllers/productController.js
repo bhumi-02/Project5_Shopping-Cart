@@ -1,7 +1,8 @@
  const productModel=require('../models/productModel')
  const bcrypt=require('bcrypt')
  const aws=require('aws-sdk')
- const currencySymbol=require('currency-symbol-map')
+ const mongoose=require('mongoose')
+//  const currencySymbol=require('currency-symbol-map')
 
 
 //------------------------------------------connection to aws---------------------------------//
@@ -46,9 +47,10 @@ let uploadFile = async (file) => {
 let stringRegex = /^[A-Za-z]{1}[A-Za-z ]{1,1000}$/
 
 let priceRegex=/^\d+(,\d{3})*(\.\d{1,2})?$/
+let numberPattern = /^\d+$/g
+//---------------------------------------------------------------------------------------------------------//
 
-
-const validForEnum=function(value){
+let validForEnum=function(value){
     let enumValue=["S","XS","M","X","L","XXL","XL"]
     value=JSON.parse(value)
     for(let x of value){
@@ -148,6 +150,7 @@ const createProduct=async function(req,res){
             return res.status(400).send({status : false, message : "is Free Shipping must be a BOOLEAN VALUE"})
         }
     }
+
    
     // if(!style){
     //     return res.status(400).send({status:false,message:" plzz provide style is required"})
@@ -157,11 +160,18 @@ const createProduct=async function(req,res){
     }
     //----------validation for availble sizes---------------------------------------------------//
 
-    if(validForEnum(availableSizes)){
+    
+    if(availableSizes){
         if(availableSizes.length===0){
             return res.status(400).send({status:false,message:"plzz provide the product size"})
         }
     }
+    if(!numberPattern.test(installments)){
+        return res.status(400).send({status:false,message:"plzz provide valid installments"})
+    }
+    
+
+
     if(files.length>0){
         var profileImage=await uploadFile(files[0])
 
@@ -184,6 +194,62 @@ const createProduct=async function(req,res){
  
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//--------------------------------------------------------delete api---------------------------------//
+
+const deleteProduct=async function(req,res){
+
+   try{
+       const productId=req.params.productId
+
+       if(!isValidObjectId(productId)){
+           return res.status(400).send({status:false,message:"not a valid product id"})
+       }
+
+       const findproduct=await productModel.findById(productId)
+       
+       if(!findproduct){
+           return res.status(404).send({status:false,message:"product doesnt exists"})
+       }
+       if(findproduct.isDeleted==true){
+           return res.status(404).send({status:false,message:"product already deleted"})
+       }
+
+       const deletedDetails=await productModel.findOneAndUpdate({_id:productId},{$set:{isDeleted:true,deletedAt:new Date()}},{new:true})
+       return res.status(200).send({status:true,message:"product deleted",data:deletedDetails})
+   }
+   catch (err) {
+    return res.status(500).send({ Status: false, message: err.message })
+}
+
+}
+
  
 
-module.exports={createProduct}
+module.exports={createProduct,deleteProduct}
