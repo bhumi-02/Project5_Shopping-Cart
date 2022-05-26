@@ -2,7 +2,7 @@ const mongoose=require('mongoose')
 
 
 const productSchema= new mongoose.Schema({
-    title: {type:String, required:"title is required", trim:true, unique: true},
+  title: {type:String, required:"title is required", trim:true, unique: true},
   description: {type:String, required:"description is required", trim:true},
   price: {type:Number,required:"price is required"},
   currencyId: {type:String, required:"currencyId is required", trim:true},

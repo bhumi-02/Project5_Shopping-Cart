@@ -18,10 +18,22 @@ let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
 const isValidObjectId=function(ObjectId){
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
-
-
-
 //---------------------------------------------------------------------------------//
+const isValid = function (value) {
+    if (typeof (value) === 'undefined' || typeof (value) === null) {
+        return false
+    }
+    if (typeof (value).trim().length == 0) {
+        return false
+    }
+    if (typeof (value) === "string" && (value).trim().length > 0) {
+        return true
+    }
+}
+
+
+
+//-----------------------------------------------------------------------------------------//
 
 
 
@@ -215,10 +227,12 @@ const createUser = async function (req, res) {
 
 const updateData = async function (req, res) {
     try {
-        let body = req.body
+        let body = JSON.parse(JSON.stringify(req.body))
         let files = req.files
         let User_id = req.params.userId
         const userToken = req.userId
+       
+
 
         if (User_id.length != 24) {
             return res.status(400).send({ Status: false, message: "Please enater the valid user id in params of 24 digit" })
@@ -234,31 +248,34 @@ const updateData = async function (req, res) {
             return res.status(400).send({ Status: false, message: "User id is not valid" })
         }
         //-----------------------------------------------------------------------------------------------------------//      
+        let{fname, lname, email, phone, password, address, profileImage} = body;
 
-        if (Object.keys(body).length === 0) {
+        if (Object.keys(body).length === 0 ) {
             return res.status(400).send({ Status: false, message: "Please provide the data" })
         }
-        if (body.fname) {
-            if (!stringRegex.test(body.fname)) {
+
+        if (fname === "" || fname ) {
+            if (!stringRegex.test(fname) ) {
                 return res.status(400).send({ Status: false, message: "first name is not valid" })
             }
+
         }
 
-        if (body.lname) {
-            if (!stringRegex.test(body.lname)) {
+        if (lname || lname === "") {
+            if (!stringRegex.test(lname)) {
                 return res.status(400).send({ Status: false, message: "last name is not valid" })
             }
         }
 
         //-----------------------------------if user wants to update the Email/Phone ---------------------------------------------//
-        if (body.email) {
-            if (!EmailRegex.test(body.email)) {
+        if (email || email === "") {
+            if (!EmailRegex.test(email)) {
                 return res.status(400).send({ Status: false, message: "email is not valid" })
             }
-            body.email=body.email.toLowerCase().trim()
+            email=email.toLowerCase().trim()
         }
-        if (body.phone) {
-            if (!mobileRegex.test(body.phone)) {
+        if (phone || phone === "") {
+            if (!mobileRegex.test(phone)) {
                 return res.status(400).send({ Status: false, message: "mobile number is not valid" })
             }
         }
@@ -266,13 +283,13 @@ const updateData = async function (req, res) {
         //---------------------------------------Email and Phone uniqcheck -----------------------------------------//
 
          
-            let uniqueCheck = await userModel.findOne({ email:body.email  })
+            let uniqueCheck = await userModel.findOne({ email:email  })
             if (uniqueCheck) {
                 if (uniqueCheck.email) {
                     return res.status(400).send({ Status: false, message: "This email has been used already" })
                 }
             }
-            let checkPhone = await userModel.findOne({ phone: body.phone })
+            let checkPhone = await userModel.findOne({ phone: phone })
             if (checkPhone){
 
             if (checkPhone.phone) {
@@ -282,62 +299,77 @@ const updateData = async function (req, res) {
         
         //----------------------------------If user wants to update the Password--------------------------------------------------------//
 
-        if (body.password) {
-            if (!Passwordregex.test(body.password)) {
+        if (password || password === "") {
+            if (!Passwordregex.test(password)) {
                 return res.status(400).send({ Status: false, message: "Please enter the valid password" })
             }
-            body.password = await bcrypt.hash(body.password, 10)
+            password = await bcrypt.hash(password, 10)
         }
         //------------------------------------------Address validation------------------------------------------------------------------//
 
-        if (body.address) {
-            body.address = JSON.parse(body.address)
+        if(address === ""){
+            return res.status(400).send({ Status: false, message: "Please provide the valid address data" })
+        }
+        
 
-            if (Object.keys(body.address).length === 0) {
+        if (address ) {
+
+            address = JSON.parse(address)
+
+            console.log("help   ",address)
+
+            if (Object.keys(address).length === 0) {
                 return res.status(400).send({ Status: false, message: "Please provide the address data" })
             }
 
-            let { shipping, billing } = body.address
+            let { shipping, billing } = address
+
+            console.log("Okay   ", shipping)
+
+           
 
             //-------------------------If user wants to Update Shipping Address ------------------------------------//
+            if(shipping === "" || shipping === {} ){
+                return res.status(400).send({ Status: false, message: "Please provide the valid shipping address data" })
+            }
+           
+            if (shipping ) {
 
-            if (shipping) {
-
-                if (shipping.street) {
+                if (shipping.street || shipping.street === "") {
                     if (!streetRegex.test(shipping.street)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid shipping street address" })
                     }
                 }
 
-                if (shipping.city) {
+                if (shipping.city || shipping.city === "") {
                     if (!streetRegex.test(shipping.city)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid shipping city address" })
                     }
                 }
 
-                if (shipping.pincode) {
+                if (shipping.pincode || shipping.pincode === "") {
                     if (!pinRegex.test(shipping.pincode)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid shipping pin code" })
                     }
                 }
             }
             //--------------------If User wants to Update Billing Address -----------------------------------------------//
-            if (billing) {
+            if (billing || billing === "") {
                 if (typeof billing != "object") {
                     return res.status(400).send({ status: false, message: "address should be an object" })
                 }
-                if (billing.street) {
+                if (billing.street || billing.street === "") {
                     if (!streetRegex.test(billing.street)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid billing street address" })
                     }
                 }
 
-                if (billing.city) {
+                if (billing.city || billing.city === "") {
                     if (!streetRegex.test(billing.city)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid billing city address" })
                     }
                 }
-                if (billing.pincode) {
+                if (billing.pincode || billing.pincode === "" ) {
                     if (!pinRegex.test(billing.pincode)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid billing pin code" })
                     }
@@ -347,8 +379,8 @@ const updateData = async function (req, res) {
 
         //-------------------------------------If user wants to update Profile Image----------------------------------------//
 
-        if (body.profileImage) {
-            if (typeof body.profileImage === "string") {
+        if (profileImage || profileImage === "") {
+            if (typeof profileImage === "string") {
                 return res.status(400).send({ Status: false, message: "Please upload the image" })
             }
         }
@@ -357,13 +389,13 @@ const updateData = async function (req, res) {
             let uploadedFileURL = await uploadFile(files[0])
             body.profileImage = uploadedFileURL
 
-            let updateProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: body.fname, lname: body.lname, password: body.password, email: body.email, phone: body.phone, profileImage: body.profileImage, address: body.address }, { new: true })
+            let updateProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email:email, phone: phone, profileImage: profileImage, address: address }, { new: true })
 
             return res.status(200).send({ Status: true, data: updateProfile })
         }
         //----------------------------------If User does not want update Profile Image------------------------------------------------------------//
 
-        let changeProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: body.fname, lname: body.lname, password: body.password, email: body.email, phone: body.phone, address: body.address }, { new: true })
+        let changeProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email:email, phone: phone, profileImage: profileImage, address: address }, { new: true })
 
         return res.status(200).send({ Status: true, data: changeProfile })
 
@@ -396,8 +428,6 @@ try{
 } catch (err) {
     return res.status(500).send({ Status: false, message: err.message })
 }
-
-
 
 }
 
