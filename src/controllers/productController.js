@@ -311,14 +311,14 @@ const getProductById = async  function(req,res) {
 
         const productId = req.params.productId
 
-        
+    
 
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "product id is invalid" })
         }
         
 
-        const findproduct=await productModel.findById(productId)
+        const findproduct=await productModel.findById(productId) 
 
         if(!findproduct){
             return res.status(400).send({status:false,message:"product doesnt exists"})
