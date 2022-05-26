@@ -310,13 +310,15 @@ const getProductById = async  function(req,res) {
 
 
         const productId = req.params.productId
-        if(!productId){
-            return res.status(400).send({ status: false, message: "product id is required" })
+
+        if (productId === "") {
+            return res.status(400).send({ status: false, message: "plzz provide the valid product size" })
         }
 
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "product id is invalid" })
         }
+        
 
         const findproduct=await productModel.findById(productId)
 
