@@ -308,13 +308,13 @@ const getProductById = async function (req, res) {
 
         // Validate of body(It must not be present)
         const body = req.body;
-        if (body) {
+        if (!body) {
             return res.status(400).send({ status: false, msg: "Body must not be present" })
         }
 
         // Validate query (it must not be present)
         const query = req.query;
-        if (query) {
+        if (!query) {
             return res.status(400).send({ status: false, msg: "Invalid parameters" });
         }
 
