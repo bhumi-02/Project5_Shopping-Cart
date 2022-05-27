@@ -130,7 +130,7 @@ const createProduct = async function (req, res) {
         // ------------------------------------------------------------------------------------------------------------------------------//
         // i have to check this one cuurencyId
 
-        if (currencyId) {
+        if (currencyId ) {
             currencyId = currencyId.toUpperCase()
             if (currencyId !== "INR") {
                 return res.status(400).send({ status: false, message: "Currency ID Must be in INR" })
@@ -139,7 +139,7 @@ const createProduct = async function (req, res) {
             data.currencyId = "INR"
         }
 
-        if (currencyFormat) {
+        if (currencyFormat ) {
             if (currencyId !== "₹") {
                 return res.status(400).send({ status: false, message: "currency format must be ₹ " })
             }
@@ -502,9 +502,7 @@ const UpdateProduct = async function (req, res) {
             
                 data.productImage = productPic
             }
-            else if(files.length === 0){
-                return res.status(400).send({ status: false, message: "No file to upload" }) 
-            }
+         
         }
 
         //-------------------------------------------------------------------------------------------------------------------------//
