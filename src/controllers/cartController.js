@@ -38,6 +38,8 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
+let digitRegex = /^[1-9]{1}[0-9]{0,10000}$/
+
 
 //------------------------------------------------------validations ends here------------------------------------------------------//
 
@@ -64,7 +66,7 @@ const createCart = async (req, res) => {
             return res.status(400).send({ status: false, messsage: "sorry you are not authorize" })
         }
 
-        const {productId,items,totalPrice,totalItems } = data
+        const {productId,items,totalPrice,totalItems,quantity } = data
 
         if(Object.keys(data).length===0){
             return res.status(400).send({ status: false, messsage: "Please enter some data" })   
@@ -79,14 +81,21 @@ const createCart = async (req, res) => {
         if (isProductPresent.length === 0) {
             return res.status(404).send({ status: false, messsage: `product not found by this prodct id ${productId}` })
         }
+        if(!quantity){
+            return res.status(400).send({ status: false, messsage: "plzz enter quantity"})
+        }
+   
+        if(!digitRegex.test(quantity) ){
+            return res.status(400).send({ status: false, messsage: "plzz enter valid quatity"})
+        }
 
         data.userId=checkUserId._id
 
-        data.items=[{productId: isProductPresent[0]._id,quantity:isProductPresent.length}]
+        data.items=[{productId: isProductPresent[0]._id,quantity:quantity}]
 
         
 
-        data.totalPrice= isProductPresent[0].price
+        data.totalPrice= (isProductPresent[0].price)*quantity
   
         data.totalItems = data.items.length
 
