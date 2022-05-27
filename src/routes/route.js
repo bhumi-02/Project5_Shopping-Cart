@@ -3,6 +3,7 @@ const router = express.Router();
 const userController=require("../controllers/userController")
 const middleWare= require("../middleware/authenTication")
 const productController=require('../controllers/productController')
+const cartController= require("../controllers/cartController")
 
 //------------------------user-api--------------------------------//
 router.post("/register",userController.createUser)
@@ -23,6 +24,10 @@ router.get("/products",productController.getProduct)
 
 
 router.get("/products/:productId",productController.getProductById)
+
+//----------------Cart API ---------------------------------------------------------//
+
+router.post("/users/:userId/cart",middleWare.Mid1,cartController.createCart)
 
 
 

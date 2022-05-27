@@ -8,8 +8,7 @@ const cartSchema=new mongoose.Schema({
     userId:{
         type:ObjectId,
         ref:'userModel',
-        required:true,
-        unique:true
+        required:true
     },
 
     items:[{
@@ -23,7 +22,8 @@ const cartSchema=new mongoose.Schema({
             type:Number,
             required:true,
             min:1
-        }
+        },
+        _id:false
     }],
      
     totalPrice:{
