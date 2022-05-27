@@ -330,21 +330,16 @@ const getProductById = async function (req, res) {
 }
 
 
-
-
-
 //--------------------------------------------------------Put api---------------------------------//
 const UpdateProduct = async function (req, res) {
     try {
         let productId = req.params.productId
 
 
-        if (!productId) {
-            return res.status(400).send({ status: false, msg: "Please enter the product id" })
+        if (!isValidObjectId(productId)) {
+            return res.status(400).send({ status: false, message: "product id is invalid" })
         }
-        if (productId.length != 24) {
-            return res.status(400).send({ status: false, msg: "Please enter the 24 digit's length of product id" })
-        }
+
         let checkProductId = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProductId) {
             return res.status(400).send({ status: false, msg: "the product id is not valid/deleted product" })
