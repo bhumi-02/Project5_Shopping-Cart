@@ -99,18 +99,23 @@ const createCart = async (req, res) => {
   
         data.totalItems = data.items.length
 
-     
-        let addingCart= await cartModel.findOneAndUpdate({userId:checkUserId._id},{$push:{items:data.items},$inc:{totalPrice:data.totalPrice,totalItems:data.totalItems}},{new:true})
+        //-------------if same user wants to add  one more produt --------------------------------------------------//
+
+        let addingCart= await cartModel.findOneAndUpdate({userId:checkUserId._id},{$push:{items:data.items},$inc:{totalPrice:data.totalPrice,totalItems:data.totalItems}},{new:true}).select({ "__v": 0})
 
         if(addingCart){
             return res.status(201).send({ status: true, message: "one more item added succefully", data: addingCart }) 
         }
 
-
+        //-------------------let's create a cart  ---------------------------------------------------------//
 
         let createCart= await cartModel.create(data)
 
-        return res.status(201).send({ status: true, message: "cart added", data: createCart })
+        //------------this line is being use to remove _V:0   ---------------------------------------------//
+
+        let findData= await cartModel.findOne({_id:createCart._id}).select({ "__v": 0})
+
+        return res.status(201).send({ status: true, message: "cart added", data: findData })
 
     }catch(err){
         return res.status(500).send({Status: false, message:err.message})
