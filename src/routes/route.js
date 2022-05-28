@@ -17,6 +17,14 @@ router.get("/user/:userId/profile",middleWare.Mid1,userController.getUser)
 router.post("/products",productController.createProduct)
 router.delete("/products/:productId",productController.deleteProduct)
 
+router.put("/products/:productId",productController.UpdateProduct)
+
+router.get("/products",productController.getProduct)
+
+
+router.get("/products/:productId",productController.getProductById)
+
+
 
 
 module.exports = router;
