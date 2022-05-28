@@ -1,6 +1,6 @@
 const userModel = require("../models/userModel")
 const bcrypt = require('bcrypt');
-const { default: mongoose } = require("mongoose");
+const mongoose=require("mongoose")
 const {uploadFile}=require("../aws/awsController")
 
 

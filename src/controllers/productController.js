@@ -6,7 +6,7 @@ const {uploadFile}=require("../aws/awsController")
 //  const currencySymbol=require('currency-symbol-map')
 
 
-// ************************************************************Validations ************************************************************ //
+// ******************************************Validations ************************************************************ //
 
 const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
@@ -164,7 +164,7 @@ const createProduct = async function (req, res) {
     }
 
 }
-// ************************************************************* GET /products ************************************************************ //
+// **************************************** GET /products ************************************************************ //
 
 const getProduct = async function (req, res) {
     try {
