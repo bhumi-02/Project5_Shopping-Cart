@@ -131,8 +131,20 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "plzz provide the valid product size" })
         }
 
+        // if (availableSizes) {
+        //     availableSizes = availableSizes.toUpperCase()
+        //     let array = availableSizes.split(",").map(x => x.trim())
+        //     // console.log(array)
+        //     for (let i = 0; i < array.length; i++) {
+        //         if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
+        //             return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
+        //         }
+        //     }
+        // }
+
         if (availableSizes) {
             availableSizes = availableSizes.toUpperCase()
+    
             if (availableSizes === "X" || availableSizes === "S" || availableSizes === "XS" || availableSizes === "M" || availableSizes === "L" || availableSizes === "XXL" || availableSizes === "XL") {
                 data.availableSizes = availableSizes
             }

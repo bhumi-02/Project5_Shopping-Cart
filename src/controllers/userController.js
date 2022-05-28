@@ -195,23 +195,22 @@ const updateData = async function (req, res) {
         let body = JSON.parse(JSON.stringify(req.body))
         let files = req.files
         let User_id = req.params.userId
-        const userToken = req.userId
+        // const userToken = req.userId
+
+        // if (!isValidObjectId(User_id)) {
+        //     return res.status(400).send({ status: false, messsage: "plzz enter valid user id" })
+        // }
        
-
-
-        if (User_id.length != 24) {
-            return res.status(400).send({ Status: false, message: "Please enater the valid user id in params of 24 digit" })
-        }
-        //-------------Authorization---------------------------------------------------------------------------//
-        let CheckUser = await userModel.findById({ _id: User_id })
-        if (CheckUser) {
-            if (CheckUser._id != userToken) {
-                return res.status(400).send({ Status: false, message: "Sorry you are not authorise person" })
-            }
-        }
-        else {
-            return res.status(400).send({ Status: false, message: "User id is not valid" })
-        }
+        // //-------------Authorization---------------------------------------------------------------------------//
+        // let CheckUser = await userModel.findById({ _id: User_id })
+        // if (CheckUser) {
+        //     if (CheckUser._id != userToken) {
+        //         return res.status(400).send({ Status: false, message: "Sorry you are not authorise person" })
+        //     }
+        // }
+        // else {
+        //     return res.status(400).send({ Status: false, message: "User id is not valid" })
+        // }
         //-----------------------------------------------------------------------------------------------------------//      
         let{fname, lname, email, phone, password, address, profileImage} = body;
 

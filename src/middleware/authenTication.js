@@ -2,12 +2,17 @@ const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const bearerToken = require('bearer-token')
+const mongoose=require("mongoose")
 
 
 //-------------------------------------------------------------------------------------------//
 let EmailRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9._]{1,}@[A-Za-z1-9]{2,15}[.]{1}[A-Za-z.]{2,15}$/
 
 let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
+
+const isValidObjectId = function (ObjectId) {
+    return mongoose.Types.ObjectId.isValid(ObjectId)
+}
 
 
 //------------------------------------------------------------------------------------------//
@@ -104,4 +109,36 @@ const Mid1 = async function (req, res, next) {
 }
 
 
-module.exports={login,Mid1}
+// ----------------------------this middleware will be used to authorisation ------------------//
+
+const authorisation= async function(req,res,next){
+    try{
+        
+        const userIdbyParams = req.params.userId
+
+        let tokenVerification = req.userId
+
+        if (!isValidObjectId(userIdbyParams)) {
+            return res.status(400).send({ status: false, messsage: "plzz enter valid user id" })
+        }
+
+        const checkUserId = await userModel.findOne({ _id: userIdbyParams, isDeleted: false })
+
+        if (!checkUserId) {
+            return res.status(400).send({ status: false, messsage: "user not found" })
+        }
+
+        if (userIdbyParams != tokenVerification) {
+            return res.status(400).send({ status: false, messsage: "sorry you are not authorize" })
+        }
+        else{
+           return next()
+        }
+
+    }catch(err){
+        return res.status(500).send({ Status: false, message: err.message })
+    }
+}
+
+
+module.exports={login,Mid1,authorisation}

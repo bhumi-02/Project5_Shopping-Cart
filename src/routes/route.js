@@ -10,7 +10,7 @@ router.post("/register",userController.createUser)
 
 router.post("/login",middleWare.login)
 
-router.put("/user/:userId/profile",middleWare.Mid1,userController.updateData)
+router.put("/user/:userId/profile",middleWare.Mid1,middleWare.authorisation,userController.updateData)
 
 router.get("/user/:userId/profile",middleWare.Mid1,userController.getUser)
 
@@ -28,7 +28,9 @@ router.get("/products/:productId",productController.getProductById)
 
 //----------------Cart API ---------------------------------------------------------//
 
-router.post("/users/:userId/cart",middleWare.Mid1,cartController.createCart)
+router.post("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartController.createCart)
+
+router.put("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartController.updateCart)
 
 router.delete('/users/:userId/cart', middleWare.Mid1, cartController.deleteCart)
 
