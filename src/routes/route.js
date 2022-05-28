@@ -30,7 +30,7 @@ router.get("/products/:productId",productController.getProductById)
 
 router.post("/users/:userId/cart",middleWare.Mid1,cartController.createCart)
 
-router.delete('/users/:userId/cart', middleware.Mid1, cartController.deleteCart)
+router.delete('/users/:userId/cart', middleWare.Mid1, cartController.deleteCart)
 
 
 

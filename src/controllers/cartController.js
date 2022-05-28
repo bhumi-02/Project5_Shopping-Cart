@@ -1,15 +1,3 @@
-const mongoose = require("mongoose")
-
-// userId: {ObjectId, refs to User, mandatory, unique},
-// items: [{
-//   productId: {ObjectId, refs to Product model, mandatory},
-//   quantity: {number, mandatory, min 1}
-// }],
-// totalPrice: {number, mandatory, comment: "Holds total price of all the items in the cart"},
-// totalItems: {number, mandatory, comment: "Holds total number of items in the cart"}
-
-
-
 const cartModel = require('../models/cartModel')
 const userModel = require('../models/userModel')
 const productModel = require('../models/productModel')
@@ -66,7 +54,7 @@ const createCart = async (req, res) => {
             return res.status(400).send({ status: false, messsage: "sorry you are not authorize" })
         }
 
-        const { productId, items, totalPrice, totalItems, quantity } = data
+        const { productId, items, totalPrice, totalItems, quantity,cartId } = data
 
         if (Object.keys(data).length === 0) {
             return res.status(400).send({ status: false, messsage: "Please enter some data" })
@@ -100,6 +88,12 @@ const createCart = async (req, res) => {
         data.totalItems = data.items.length
 
         //-------------if same user wants to add  one more produt --------------------------------------------------//
+
+        if(cartId){
+            if (!isValidObjectId(cartId)) {
+                return res.status(400).send({ status: false, messsage: "plzz enter valid cartId" })
+            }
+        }
 
         let addingCart = await cartModel.findOneAndUpdate({ userId: checkUserId._id }, { $push: { items: data.items }, $inc: { totalPrice: data.totalPrice, totalItems: data.totalItems } }, { new: true }).select({ "__v": 0 })
 

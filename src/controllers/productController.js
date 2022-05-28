@@ -2,36 +2,10 @@ const productModel = require('../models/productModel')
 const aws = require('aws-sdk')
 const mongoose = require('mongoose')
 const { is } = require('express/lib/request')
+const {uploadFile}=require("../aws/awsController")
 //  const currencySymbol=require('currency-symbol-map')
 
 
-// ************************************************************* Connection to AWS************************************************************ //
-aws.config.update({
-    accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
-    secretAccessKey: "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",
-    region: "ap-south-1"
-})
-
-let uploadFile = async (file) => {
-    return new Promise(function (resolve, reject) {
-
-        let s3 = new aws.S3({ apiVersion: '2006-03-01' });
-
-        var uploadParams = {
-            ACL: "public-read",
-            Bucket: "classroom-training-bucket",
-            Key: "abc/" + file.originalname,
-            Body: file.buffer
-        }
-        s3.upload(uploadParams, function (err, data) {
-            if (err) {
-                return reject({ "error": err })
-            }
-
-            return resolve(data.Location)
-        })
-    })
-}
 // ************************************************************Validations ************************************************************ //
 
 const isValidObjectId = function (ObjectId) {
@@ -39,6 +13,8 @@ const isValidObjectId = function (ObjectId) {
 }
 
 let stringRegex = /^[A-Za-z]{1}[A-Za-z 0-9]{1,1000}$/
+
+let descriptionRegex= /^[A-Za-z1-9]{1}[A-Za-z 0-9.@#-_]{1,10000}$/
 
 let priceRegex = /^\d+(,\d{3})*(\.\d{1,2})?$/
 let numberPattern = /^[0-9]{1}[0-9]{0,1000}$/
@@ -76,7 +52,7 @@ const createProduct = async function (req, res) {
 
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, isDeleted } = data
 
-        // ************************************************************* Title validation ************************************************************ //
+        // *****************------------------ Title validation ------------------------***************************** //
 
         if (!title) {
 
@@ -93,11 +69,11 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "title already exist" })
         }
 
-        // ************************************************************* Description Validation ************************************************************ //
+        // ***************---------- Description Validation ---------------------------********************** //
         if (!description) {
             return res.status(400).send({ status: false, message: "description is required" })
         }
-        if (!stringRegex.test(description)) {
+        if (!descriptionRegex.test(description)) {
             return res.status(400).send({ status: false, message: "plzz enter valid description" })
         }
         if (!price) {
@@ -124,7 +100,7 @@ const createProduct = async function (req, res) {
             data.currencyFormat = "₹"
         }
 
-        // ------------------------------------------------------------------------------------------------------------------------------//
+        // ------------------------------------if isFreeShipping coming from body---------------------------------------//
         if (isFreeShipping === "") {
             return res.status(400).send({ status: false, message: " plzz provide isFreeShipping,it must be Boolean " })
         }
@@ -323,7 +299,7 @@ const UpdateProduct = async function (req, res) {
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, isDeleted } = data
 
 
-        // *****************************************************Title Validation ************************************************************ //       
+        // *********************************Title Validation ********************************************* //       
 
         if (title === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid title" })
@@ -345,7 +321,7 @@ const UpdateProduct = async function (req, res) {
             }
         }
 
-        // ****************************************************** Description Validation ************************************************************ //
+        // *************------------ Description Validation -------------------------------************** //
         if (description === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid description" })
         }
@@ -357,7 +333,7 @@ const UpdateProduct = async function (req, res) {
         }
 
 
-        //----------------------Price Checking--------------------------------------------------//
+        //------------------------------------Price Checking--------------------------------------------------//
         if (price === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid price" })
         }
@@ -368,8 +344,8 @@ const UpdateProduct = async function (req, res) {
             }
         }
 
-        // ------------------------------------------------------------------------------------------------------------------------------//
-        // i have to check this one cuurencyId
+        // ---------------------------------------------------------------------------------------------------//
+       
         if (currencyId === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid currencyId" })
         }
@@ -383,7 +359,7 @@ const UpdateProduct = async function (req, res) {
                 data.currencyId = "INR"
             }
         }
-        //----------------------------------------------------------------------------------------------------------------------------//
+        //----------------------------------------------------------------------------------------------------------//
         if (currencyFormat === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid currencyFormat" })
         }
@@ -395,7 +371,7 @@ const UpdateProduct = async function (req, res) {
                 data.currencyFormat = "₹"
             }
         }
-        // ------------------------------------------------------------------------------------------------------------------------------//
+        // -----------------------------------------------------------------------------------------------------------------//
         if (isFreeShipping === "") {
             return res.status(400).send({ status: false, message: " plzz provide isFreeShipping,it must be Boolean " })
         }
@@ -433,7 +409,7 @@ const UpdateProduct = async function (req, res) {
                 return res.status(400).send({ status: false, message: "enter valid style" })
             }
         }
-        //-------------------------------------------validation for installments---------------------------------------------------//
+        //-----------------------------validation for installments-------------------------------------------//
         if (installments === "") {
             return res.status(400).send({ status: false, message: "plzz enter the installments" })
         }
@@ -444,7 +420,7 @@ const UpdateProduct = async function (req, res) {
             }
         }
 
-        //------------------------If Available Sze to be update-----------------------------------------------------------------------------//
+        //------------------------If Available Sze to be update--------------------------------------------------//
         if (availableSizes === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid product size" })
         }
@@ -459,7 +435,7 @@ const UpdateProduct = async function (req, res) {
             }
         }
 
-        //--------------------------------------If Profile image is to be update--------------------------------------------------------------//
+        //--------------------------------------If Profile image is to be update------------------------------------//
 
 
         if (files) {
@@ -475,7 +451,7 @@ const UpdateProduct = async function (req, res) {
          
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------//
+        //-----------------------------------------------------------------------------------------------------//
 
 
         const updateData = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { title: title, description: description, price: price, currencyId: currencyId, currencyFormat: currencyFormat, productImage: productPic, installments: installments, style: style, isFreeShipping: isFreeShipping, availableSizes: availableSizes, isDeleted: isDeleted }, { new: true })
@@ -495,7 +471,7 @@ const UpdateProduct = async function (req, res) {
 
 
 
-//--------------------------------------------------------delete api---------------------------------//
+//------------------------------{delete api}---------------------------------//
 
 const deleteProduct = async function (req, res) {
 
