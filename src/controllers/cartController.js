@@ -182,25 +182,35 @@ const updateCart = async function(req,res){
         }
 
         //Key 'removeProduct' denotes whether a product is to be removed({removeProduct: 0}) or its quantity has to be decremented by 1({removeProduct: 1})
-        // if(removeProduct){
-        //     if(removeProduct !=0 || removeProduct !=1){
-        //         return res.status(404).send({ status: false, messsage: "please enter the valid removeProduct" })
-        //     }
-        // }
-
-        // data.items=[{productId:productId}]
-        // data.totalPrice=isProductPresent.price
-        // data.totalItems= 1
+        if(removeProduct){
+            if(removeProduct !=0 || removeProduct !=1){
+                return res.status(404).send({ status: false, messsage: "please enter the valid removeProduct" })
+            }
+        }
 
 
-        // if(removeProduct === 0 ){
 
-        //     console.log("help:checkCartupdate     ")
 
-        //     let checkCartupdate= await cartModel.findByIdAndDelete({_id:cartId},{items:data.items},{new:true})
+        if(removeProduct === 0 ){
+
+            // console.log("enter kr gya    ",productId)
+
+            // let checkCartupdate= await cartModel.findOne({_id:cartId}).select({"__v": 0})
+
+            // console.log("update cart    ",checkCartupdate.items)
+            // let array = checkCartupdate.items
+
+            // if(array.hasOwnProperty(productId)){
+            //     return console.log("true:  ")
+            // }
+            // else{
+            //     return console.log("not include")
+            // }
             
-        //     console.log("help:checkCartupdate     ",checkCartupdate)
-        // }
+            
+
+           // return res.status(200).send({ status: true, message: "cart updated", data: checkCartupdate })
+        }
 
         // let checkCartupdate= await cartModel.findByIdAndUpdate({_id:cartId},{items:data.items})
 

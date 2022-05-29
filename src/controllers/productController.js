@@ -2,7 +2,7 @@ const productModel = require('../models/productModel')
 const aws = require('aws-sdk')
 const mongoose = require('mongoose')
 const { is } = require('express/lib/request')
-const {uploadFile}=require("../aws/awsController")
+const { uploadFile } = require("../aws/awsController")
 //  const currencySymbol=require('currency-symbol-map')
 
 
@@ -12,9 +12,9 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-let stringRegex = /^[A-Za-z]{1}[A-Za-z 0-9]{1,1000}$/
+let stringRegex = /^[A-Za-z]{1}[A-Za-z 0-9-_]{1,1000}$/
 
-let descriptionRegex= /^[A-Za-z1-9]{1}[A-Za-z 0-9.@#-_]{1,10000}$/
+let descriptionRegex = /^[A-Za-z1-9]{1}[A-Za-z 0-9.@#-_*]{1,10000}$/
 
 let priceRegex = /^\d+(,\d{3})*(\.\d{1,2})?$/
 let numberPattern = /^[0-9]{1}[0-9]{0,1000}$/
@@ -35,6 +35,9 @@ let validForEnum = function (value) {
 const isValidDetails = function (requestBody) {
     return Object.keys(requestBody).length > 0
 
+}
+const isValidSize = (sizes) => {
+    return ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes);
 }
 
 // ************************************************************* Create products ************************************************************ //
@@ -83,7 +86,7 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "plzz enter valid price" })
         }
 
-        if (currencyId ) {
+        if (currencyId) {
             currencyId = currencyId.toUpperCase()
             if (currencyId !== "INR") {
                 return res.status(400).send({ status: false, message: "Currency ID Must be in INR" })
@@ -92,7 +95,7 @@ const createProduct = async function (req, res) {
             data.currencyId = "INR"
         }
 
-        if (currencyFormat ) {
+        if (currencyFormat) {
             if (currencyId !== "₹") {
                 return res.status(400).send({ status: false, message: "currency format must be ₹ " })
             }
@@ -131,27 +134,32 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "plzz provide the valid product size" })
         }
 
-        // if (availableSizes) {
-        //     availableSizes = availableSizes.toUpperCase()
-        //     let array = availableSizes.split(",").map(x => x.trim())
-        //     // console.log(array)
-        //     for (let i = 0; i < array.length; i++) {
-        //         if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
-        //             return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
-        //         }
-        //     }
-        // }
-
         if (availableSizes) {
-            availableSizes = availableSizes.toUpperCase()
-    
-            if (availableSizes === "X" || availableSizes === "S" || availableSizes === "XS" || availableSizes === "M" || availableSizes === "L" || availableSizes === "XXL" || availableSizes === "XL") {
-                data.availableSizes = availableSizes
-            }
-            else {
-                return res.status(400).send({ status: false, message: "Please enter the valid size" })
+            availableSizes=availableSizes.toUpperCase()
+            let array = availableSizes.split(",").map(x => x.trim())
+          
+            for (let i = 0; i < array.length; i++) {
+                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
+                    return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}`})
+                }
+                let uniqueAvailableSize= [...new Set(array)]
+                data.availableSizes=uniqueAvailableSize
             }
         }
+
+
+
+
+        // if (availableSizes) {
+        //     availableSizes = availableSizes.toUpperCase()
+
+        //     if (availableSizes === "X" || availableSizes === "S" || availableSizes === "XS" || availableSizes === "M" || availableSizes === "L" || availableSizes === "XXL" || availableSizes === "XL") {
+        //         data.availableSizes = availableSizes
+        //     }
+        //     else {
+        //         return res.status(400).send({ status: false, message: "Please enter the valid size" })
+        //     }
+        // }
 
         if (installments) {
             if (!numberPattern.test(installments)) {
@@ -357,7 +365,7 @@ const UpdateProduct = async function (req, res) {
         }
 
         // ---------------------------------------------------------------------------------------------------//
-       
+
         if (currencyId === "") {
             return res.status(400).send({ status: false, message: "plzz provide the valid currencyId" })
         }
@@ -438,12 +446,15 @@ const UpdateProduct = async function (req, res) {
         }
 
         if (availableSizes) {
-            availableSizes = availableSizes.toUpperCase()
-            if (availableSizes === "X" || availableSizes === "S" || availableSizes === "XS" || availableSizes === "M" || availableSizes === "L" || availableSizes === "XXL" || availableSizes === "XL") {
-                data.availableSizes = data
-            }
-            else {
-                return res.status(400).send({ status: false, message: "Please enter the valid size" })
+            availableSizes=availableSizes.toUpperCase()
+            let array = availableSizes.split(",").map(x => x.trim())
+          
+            for (let i = 0; i < array.length; i++) {
+                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
+                    return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}`})
+                }
+                let uniqueAvailableSize= [...new Set(array)]
+                data.availableSizes=uniqueAvailableSize
             }
         }
 
@@ -457,10 +468,10 @@ const UpdateProduct = async function (req, res) {
                 if (productPic.length === 0) {
                     return res.status(400).send({ status: false, message: "No file upload" })
                 }
-            
+
                 data.productImage = productPic
             }
-         
+
         }
 
         //-----------------------------------------------------------------------------------------------------//
