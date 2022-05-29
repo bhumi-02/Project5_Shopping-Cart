@@ -226,7 +226,86 @@ const updateCart = async function(req,res){
 
 
 
-module.exports = { createCart, deleteCart,updateCart }
+
+//------------------------------------------------------Get Api--------------------------------------------------------------------//
+
+const getCart=async function(req,res){
+    try{
+
+     let userId=req.params.userId
+     let userIdFromToken=req.userId
+
+     if(!isValidObjectId(userId)){
+          return res.send(400).send({status:false,message:"user id is not valid"})
+     }
+
+     const userByuserId=await userModel.findById(userId)
+     if(!userByuserId){
+         return res.status(404).send({status:false,message:"user id doesnt exist"})
+     }
+     if(userId!=userIdFromToken)
+     {
+         return res.status(403).send({status:false,message:"you are not authorized to do this"})
+     }
+
+     const findCart=await cartModel.findOne({userId:userId})
+     
+         if(!findCart){
+             return res.status(400).send({status:false,message:"cart not exists with this userId"})
+         }
+         
+         if(findCart.totalPrice===0){
+             return res.status(404).send({status:false,message:"cart is empty"})
+         }
+         return res.status(200).send({status:true,message:"cart details",data:findCart})
+     
+    }
+
+      catch (err) {
+    return res.status(500).send({ Status: false, message: err.message })
+        }
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { createCart, deleteCart,updateCart,getCart }
 
 
 

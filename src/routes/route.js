@@ -34,6 +34,8 @@ router.put("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartCo
 
 router.delete('/users/:userId/cart', middleWare.Mid1, cartController.deleteCart)
 
+router.get("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartController.getCart)
+
 
 
 
