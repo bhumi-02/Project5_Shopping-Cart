@@ -36,7 +36,7 @@ let removeProductRegex = /^[0-1]{1}$/
 
 //------------------------------------------------------validations ends here------------------------------------------------------//
 
-
+// ******************************************************** POST /users/:userId/cart****************************************************************//
 const createCart = async (req, res) => {
     try {
 
@@ -139,55 +139,7 @@ const createCart = async (req, res) => {
         return res.status(500).send({ Status: false, message: err.message })
     }
 }
-// ******************************************************** DELETE /users/:userId/cart ******************************************************* //
-const deleteCart = async function (req, res) {
-    try {
-        // Validate body (it must not be present)
-        const body = req.body
-        if (body) {
-            return res.status(400).send({ status: false, msg: "Invalid parameters" })
-        }
-
-        // Validate query (it must not be present)
-        const query = req.query;
-        if (query) {
-            return res.status(400).send({ status: false, msg: "Invalid parameters" });
-        }
-
-        // Validate params
-        userId = req.params.userId
-        if (!userId) {
-            return res.status(400).send({ status: false, msg: `${userId} is invalid` })
-        }
-
-        //  To check user is present or not
-        const userSearch = await userModel.findById({ _id: userId })
-        if (!userSearch) {
-            return res.status(404).send({ status: false, msg: "User doesnot exist" })
-        }
-
-        // AUTHORISATION
-        if (userId !== req.user.userId) {
-            return res.status(401).send({ status: false, msg: "Unauthorised access" })
-        }
-
-        // To check cart is present or not
-        const cartSearch = await cartModel.findOne({ userId })
-        if (!cartSearch) {
-            return res.status(404).send({ status: false, msg: "cart doesnot exist" })
-        }
-
-        const cartdelete = await cartModel.findOneAndUpdate({ userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
-        res.status(204).send({ status: true, msg: "Cart deleted" })
-
-    }
-    catch (err) {
-        //console.log("This is the error :", err.message)
-        res.status(500).send({ msg: "Error", error: err.message })
-    }
-}
-
-// ******************************************************** put api***********************
+// ******************************************************** PUT /users/:userId/cart **********************************************************//
 
 const updateCart = async function (req, res) {
     try {
@@ -283,11 +235,7 @@ const updateCart = async function (req, res) {
     }
 }
 
-
-
-
-//------------------------------------------------------Get Api--------------------------------------------------------------------//
-
+// ******************************************************** GET /users/:userId/cart ******************************************************* //
 const getCart = async function (req, res) {
     try {
 
@@ -323,6 +271,55 @@ const getCart = async function (req, res) {
         return res.status(500).send({ Status: false, message: err.message })
     }
 }
+// ******************************************************** DELETE /users/:userId/cart ******************************************************* //
+const deleteCart = async function (req, res) {
+    try {
+        // Validate body (it must not be present)
+        const body = req.body
+        if (body) {
+            return res.status(400).send({ status: false, msg: "Invalid parameters" })
+        }
+
+        // Validate query (it must not be present)
+        const query = req.query;
+        if (query) {
+            return res.status(400).send({ status: false, msg: "Invalid parameters" });
+        }
+
+        // Validate params
+        userId = req.params.userId
+        if (!userId) {
+            return res.status(400).send({ status: false, msg: `${userId} is invalid` })
+        }
+
+        //  To check user is present or not
+        const userSearch = await userModel.findById({ _id: userId })
+        if (!userSearch) {
+            return res.status(404).send({ status: false, msg: "User doesnot exist" })
+        }
+
+        // AUTHORISATION
+        if (userId !== req.user.userId) {
+            return res.status(401).send({ status: false, msg: "Unauthorised access" })
+        }
+
+        // To check cart is present or not
+        const cartSearch = await cartModel.findOne({ userId })
+        if (!cartSearch) {
+            return res.status(404).send({ status: false, msg: "cart doesnot exist" })
+        }
+
+        const cartdelete = await cartModel.findOneAndUpdate({ userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
+        res.status(204).send({ status: true, msg: "Cart deleted" })
+
+    }
+    catch (err) {
+        //console.log("This is the error :", err.message)
+        res.status(500).send({ msg: "Error", error: err.message })
+    }
+}
+
+module.exports ={createCart,updateCart,getCart,deleteCart}
 
 
 
