@@ -3,6 +3,7 @@ const cartModel = require('../models/cartModel')
 const userModel = require('../models/userModel')
 const productModel = require('../models/productModel')
 const jwt = require('jsonwebtoken')
+const { update } = require("../models/cartModel")
 
 
 //-----------------------------------------some validations-----------------------------------------------------//
@@ -50,9 +51,9 @@ const createCart = async (req, res) => {
             return res.status(400).send({ status: false, messsage: "plzz enter valid productId" })
         }
 
-        const isProductPresent = await productModel.find({ _id: productId, isDeleted: false })
+        const isProductPresent = await productModel.findOne({ _id: productId, isDeleted: false })
 
-        if (isProductPresent.length === 0) {
+        if (!isProductPresent) {
             return res.status(404).send({ status: false, messsage: `product not found by this prodct id ${productId}` })
         }
         if (!quantity) {
@@ -62,12 +63,15 @@ const createCart = async (req, res) => {
         if (!digitRegex.test(quantity)) {
             return res.status(400).send({ status: false, messsage: "plzz enter valid quatity" })
         }
+        if(typeof quantity === "string"){
+            return res.status(400).send({ status: false, messsage: "plzz enter quantity in Number not as an including string" })
+        }
 
         data.userId = userIdbyParams
 
-        data.items = [{ productId: isProductPresent[0]._id, quantity: quantity }]
+        data.items = [{ productId: isProductPresent._id, quantity: quantity }]
 
-        data.totalPrice = (isProductPresent[0].price) * quantity
+        data.totalPrice = (isProductPresent.price) * quantity
 
         data.totalItems = data.items.length
 
@@ -78,6 +82,39 @@ const createCart = async (req, res) => {
                 return res.status(400).send({ status: false, messsage: "plzz enter valid cartId" })
             }
         }
+        //----------------------------------------------------------------------------------------------------------//
+        let checkCart = await cartModel.findOne({userId:userIdbyParams})
+
+        if(checkCart){
+            if(!cartId){
+                    return res.status(400).send({ status: false, messsage: "plzz enter cartId" })
+            }
+        
+            let existCart =await cartModel.findById({_id:cartId})
+
+            if(!existCart){
+                return res.status(400).send({ status: false, messsage: "does not exist cartId" })
+            }
+         
+            if(existCart){
+                for(let i=0;i<existCart.items.length;i++){
+                    if(existCart.items[i].productId == productId){
+                        existCart.items[i].quantity=existCart.items[i].quantity + quantity
+
+                        items=existCart.items
+
+                        totalPrice= (existCart.totalPrice)+(isProductPresent.price*quantity)
+
+                        let updatnewCart= await cartModel.findOneAndUpdate({userId:userIdbyParams},{items:items,totalPrice:totalPrice},{new:true}).select({ "__v": 0 })
+
+                        return res.status(201).send({ status: true, message: "product added success", data: updatnewCart })
+                    }
+                }
+            }
+
+        }
+
+        //----------------------------------------------------------------------------------------------------------//
 
         let addingCart = await cartModel.findOneAndUpdate({ userId: userIdbyParams }, { $push: { items: data.items }, $inc: { totalPrice: data.totalPrice, totalItems: data.totalItems } }, { new: true }).select({ "__v": 0 })
 

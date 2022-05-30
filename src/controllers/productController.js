@@ -142,24 +142,11 @@ const createProduct = async function (req, res) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
                     return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}`})
                 }
-                let uniqueAvailableSize= [...new Set(array)]
+                let uniqueAvailableSize= [...new Set(array)]   //if multiple size of same name
                 data.availableSizes=uniqueAvailableSize
             }
         }
 
-
-
-
-        // if (availableSizes) {
-        //     availableSizes = availableSizes.toUpperCase()
-
-        //     if (availableSizes === "X" || availableSizes === "S" || availableSizes === "XS" || availableSizes === "M" || availableSizes === "L" || availableSizes === "XXL" || availableSizes === "XL") {
-        //         data.availableSizes = availableSizes
-        //     }
-        //     else {
-        //         return res.status(400).send({ status: false, message: "Please enter the valid size" })
-        //     }
-        // }
 
         if (installments) {
             if (!numberPattern.test(installments)) {
