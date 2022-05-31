@@ -5,7 +5,8 @@ const orderSchema= new mongoose.Schema({
     userId: {type: ObjectId, ref:"user", required:true},
     items: [{
       productId: {type: ObjectId, ref:"product", required:true},
-      quantity: {type: Number, required:true, min: 1}
+      quantity: {type: Number, required:true, min: 1},
+      _id:false
     }],
     totalPrice: {type: Number, required:true, comment: "Holds total price of all the items in the cart"},
     totalItems: {type: Number, required:true, comment: "Holds total number of items in the cart"},

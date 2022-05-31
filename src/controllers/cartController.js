@@ -271,6 +271,7 @@ const updateCart = async function (req, res) {
                         const updateItems = cart.totalItems - 1
                         const productPrice = product.price * 1
                         const updatePrice = cart.totalPrice - productPrice
+
                         cart.items.splice(i, 1)
 
                         const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
@@ -279,7 +280,6 @@ const updateCart = async function (req, res) {
                     } 
                     else {
                         
-                       
                         const updatedPrice = cart.totalPrice - (product.price * 1)
                         const updatedQuantityAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatedPrice }, { new: true })
                         return res.status(200).send({ status: true, msg: "Quantity has been updated successfully in the cart", data: updatedQuantityAndPrice })

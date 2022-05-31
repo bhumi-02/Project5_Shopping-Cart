@@ -4,6 +4,7 @@ const userController=require("../controllers/userController")
 const middleWare= require("../middleware/authenTication")
 const productController=require('../controllers/productController')
 const cartController= require("../controllers/cartController")
+const orderController= require("../controllers/orderController")
 
 //------------------------user-api--------------------------------//
 router.post("/register",userController.createUser)
@@ -35,6 +36,10 @@ router.put("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartCo
 router.delete('/users/:userId/cart', middleWare.Mid1, cartController.deleteCart)
 
 router.get("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartController.getCart)
+
+//---------------Order Api ----------------------------------------------------------//
+
+router.post("/users/:userId/orders",middleWare.Mid1,middleWare.authorisation,orderController.createOrder)
 
 
 
