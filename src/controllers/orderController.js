@@ -28,7 +28,7 @@ const createOrder = async function(req,res){
                 return res.status(400).send({Status: false , message: "no cart found"})   
             }
         }
-
+        //--------------checking userId in cart model , it exist or not -----------------------------//
         let checkUserwithCart= await cartModel.findOne({userId:req.params.userId})
         if(!checkUserwithCart){
             return res.status(400).send({Status: false , message: "no cart found with this user"})
@@ -40,7 +40,7 @@ const createOrder = async function(req,res){
             for(let i = 0 ; i<checkUserwithCart.items.length; i++ ){
                 sum =sum + checkUserwithCart.items[i].quantity  
             }
-            body.totalQuantity=sum
+            body.totalQuantity=sum     // this one is calculating total quantity
         }
 
         if(status || status == ""){
@@ -53,13 +53,13 @@ const createOrder = async function(req,res){
         }
 
         if(cancellable || cancellable == ""){
-            cancellable = cancellable.toLowerCase()
-            if(cancellable === true || cancellable === false || cancellable === "false" || cancellable === "true"){
+          
+            if(typeof cancellable === "boolean"){
                 body.cancellable=cancellable
-            }else{
-                return res.status(400).send({Status: false , message: "Please enter valid cancellable"})
             }
-
+           else{
+                return res.status(400).send({Status: false , message: "Please enter valid cancellable, it must be boolean without having string"})
+            }
         }
 
         body.totalItems = checkUserwithCart.totalItems
@@ -67,7 +67,6 @@ const createOrder = async function(req,res){
         body.totalPrice = checkUserwithCart.totalPrice
         body.userId=req.params.userId
         
-
 
         let createOrder = await orderModel.create(body)
 
