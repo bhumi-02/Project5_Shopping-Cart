@@ -227,6 +227,7 @@ const updateCart = async function (req, res) {
         if (!cart) {
             return res.status(404).send({ status: false, msg: "Cart not found" })
         }
+        
         if (cart.totalPrice == "0" || cart.totalItems == "0") {
             return res.status(400).send({ status: false, msg: "Cart is empty" })
         }
@@ -245,12 +246,15 @@ const updateCart = async function (req, res) {
             for (let i = 0; i < cart.items.length; i++) {
            
                 if (cart.items[i].productId == productId) {
+
                     const productPrice = product.price * cart.items[i].quantity
+
                     const updatePrice = cart.totalPrice - productPrice
-                    cart.items.splice(i, 1)
+
+                    cart.items.splice(i,1)
                    
-                    const updateItems = cart.totalItems - 1
-                    const updateItemsAndPrice = await cartModel.findOneAndUpdate({ userId: userId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
+                    let updateItems = cart.totalItems - 1
+                    const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
 
                     return res.status(200).send({ status: true, msg: "Succesfully Updated in the cart", data: updateItemsAndPrice })
                 }   
@@ -261,21 +265,23 @@ const updateCart = async function (req, res) {
         if (removeProduct == 1) {
             for (let i = 0; i < cart.items.length; i++) {
                 if (cart.items[i].productId == productId) {
-                    const updateQuantity = cart.items[i].quantity - 1
-                    if (updateQuantity < 1) {
+                    cart.items[i].quantity =cart.items[i].quantity - 1
+
+                    if (cart.items[i].quantity < 1) {
                         const updateItems = cart.totalItems - 1
-                        const productPrice = product.price * cart.items[i].quantity
+                        const productPrice = product.price * 1
                         const updatePrice = cart.totalPrice - productPrice
                         cart.items.splice(i, 1)
 
-                        const updateItemsAndPrice = await cartModel.findOneAndUpdate({ userId: userId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
+                        const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
                         return res.status(200).send({ status: true, msg: "Product has been removed successfully from the cart", data: updateItemsAndPrice })
 
                     } 
                     else {
-                        cart.items[i].quantity = updateQuantity
+                        
+                       
                         const updatedPrice = cart.totalPrice - (product.price * 1)
-                        const updatedQuantityAndPrice = await cartModel.findOneAndUpdate({ userId: userId }, { items: cart.items, totalPrice: updatedPrice }, { new: true })
+                        const updatedQuantityAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatedPrice }, { new: true })
                         return res.status(200).send({ status: true, msg: "Quantity has been updated successfully in the cart", data: updatedQuantityAndPrice })
                     }
                 }
