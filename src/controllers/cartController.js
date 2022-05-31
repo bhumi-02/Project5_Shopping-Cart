@@ -58,6 +58,9 @@ const createCart = async (req, res) => {
         if (!isProductPresent) {
             return res.status(404).send({ status: false, messsage: `product not found by this prodct id ${productId}` })
         }
+        if(quantity === ""){
+            return res.status(400).send({ status: false, messsage: "plzz enter valid quatity , please use digit" })
+        }
         if(!quantity){
              quantity=1
         }
