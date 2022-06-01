@@ -62,7 +62,7 @@ const createOrder = async function(req,res){
             }
         }
 
-        let DuplicateOrder= await orderModel.findOne({userId:req.params.userId})
+        let DuplicateOrder= await orderModel.findOne({userId:req.params.userId,isDeleted:false})
        
        if(DuplicateOrder){
     
@@ -106,11 +106,11 @@ const updateOrder= async function(req,res){
             return res.status(400).send({Status: false , message: "Please provide valid orderId"})  
         }
 
-        let checkUser= await orderModel.findOne({userId:req.params.userId})
+        let checkUser= await orderModel.findOne({userId:req.params.userId,isDeleted:false})
         if(!checkUser){
             return res.status(404).send({Status: false , message: "user has not created any order"})   
         }
-        let checkOrder = await orderModel.findById({_id:orderId})
+        let checkOrder = await orderModel.findOne({_id:orderId,isDeleted:false})
         if(!checkOrder){
             return res.status(404).send({Status: false , message: "no order found with given orderId"})   
         }
@@ -124,7 +124,7 @@ const updateOrder= async function(req,res){
         }
 
         if(checkOrder.cancellable == true){
-            let updateOrderDetail= await orderModel.findByIdAndUpdate({_id:orderId},{status:"cancelled"},{new:true}).select({ "__v": 0})
+            let updateOrderDetail= await orderModel.findOneAndUpdate({_id:orderId,isDeleted:false},{status:"cancelled",isDeleted:true,deletedAt: Date.now()},{new:true}).select({ "__v": 0})
 
             if(!updateOrderDetail){
                 return res.status(400).send({Status: false , message: "Sorry it can not be cancelled"})   
