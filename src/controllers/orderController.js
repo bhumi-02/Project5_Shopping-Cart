@@ -28,8 +28,18 @@ const createOrder = async function(req,res){
                 return res.status(400).send({Status: false , message: "Please enter valid cartId"})
         }
 
+        //-----------------------------Cart it existing validation -----------------------------------//
+
+        let checkCartId = await cartModel.findById({_id:cartId})
+
+        if(!checkCartId){
+            return res.status(400).send({Status: false , message: "cart does not exist"})
+        }
+
+
+
         //--------------checking userId in cart model , it exist or not -----------------------------//
-        
+
         let checkUserwithCart= await cartModel.findOne({_id:cartId, userId:req.params.userId})
         if(!checkUserwithCart){
             return res.status(400).send({Status: false , message: "no cart found with this userId/cartId"})
@@ -132,7 +142,7 @@ const updateOrder= async function(req,res){
             return res.status(200).send({ status: true, message: "Success", data: updateOrderDetail })
         }
 
-        return res.status(400).send({Status: false , message: "You can not cancelled the this Item"})
+        return res.status(400).send({Status: false , message: "You can not cancelled this Item"})
 
 
     }catch(err){
