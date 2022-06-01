@@ -3,7 +3,7 @@ const aws = require('aws-sdk')
 const mongoose = require('mongoose')
 const { is } = require('express/lib/request')
 const { uploadFile } = require("../aws/awsController")
-//  const currencySymbol=require('currency-symbol-map')
+
 
 
 // ******************************************Validations ************************************************************ //
@@ -20,25 +20,25 @@ let priceRegex = /^\d+(,\d{3})*(\.\d{1,2})?$/
 let numberPattern = /^[0-9]{1}[0-9]{0,1000}$/
 
 
-let validForEnum = function (value) {
-    let enumValue = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-    value = JSON.parse(value)
-    for (let x of value) {
-        if (enumValue.includes(x) == false) {
-            return false
-        }
-    }
-    return true
-}
-// ************************************************************* Ends ************************************************************ //
+// let validForEnum = function (value) {
+//     let enumValue = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+//     value = JSON.parse(value)
+//     for (let x of value) {
+//         if (enumValue.includes(x) == false) {
+//             return false
+//         }
+//     }
+//     return true
+// }
+// // ************************************************************* Ends ************************************************************ //
 
-const isValidDetails = function (requestBody) {
-    return Object.keys(requestBody).length > 0
+// const isValidDetails = function (requestBody) {
+//     return Object.keys(requestBody).length > 0
 
-}
-const isValidSize = (sizes) => {
-    return ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes);
-}
+// }
+// const isValidSize = (sizes) => {
+//     return ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes);
+// }
 
 // ************************************************************* Create products ************************************************************ //
 

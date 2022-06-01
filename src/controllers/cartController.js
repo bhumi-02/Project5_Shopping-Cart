@@ -9,21 +9,6 @@ const { is } = require("express/lib/request")
 
 //-----------------------------------------some validations-----------------------------------------------------//
 
-const isValid = function (value) {
-    if (typeof (value) === 'undefined' || typeof (value) === null) {
-        return false
-    }
-    if (typeof (value).trim().length == 0) {
-        return false
-    }
-    if (typeof (value) === "string" && (value).trim().length > 0) {
-        return true
-    }
-    if (typeof (value) === Number && (value).trim().length > 0) {
-        return true
-    }
-}
-
 
 const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
@@ -147,43 +132,17 @@ const createCart = async (req, res) => {
 // ******************************************************** DELETE /users/:userId/cart ******************************************************* //
 const deleteCart = async function (req, res) {
     try {
-        // Validate body (it must not be present)
-        const body = req.body
-        if (body) {
-            return res.status(400).send({ status: false, msg: "Invalid parameters" })
-        }
-
-        // Validate query (it must not be present)
-        const query = req.query;
-        if (query) {
-            return res.status(400).send({ status: false, msg: "Invalid parameters" });
-        }
-
         // Validate params
         userId = req.params.userId
-        if (!userId) {
-            return res.status(400).send({ status: false, msg: `${userId} is invalid` })
-        }
-
-        //  To check user is present or not
-        const userSearch = await userModel.findById({ _id: userId })
-        if (!userSearch) {
-            return res.status(404).send({ status: false, msg: "User doesnot exist" })
-        }
-
-        // AUTHORISATION
-        if (userId !== req.user.userId) {
-            return res.status(401).send({ status: false, msg: "Unauthorised access" })
-        }
 
         // To check cart is present or not
-        const cartSearch = await cartModel.findOne({ userId })
+        const cartSearch = await cartModel.findOne({userId: userId })
         if (!cartSearch) {
             return res.status(404).send({ status: false, msg: "cart doesnot exist" })
         }
 
-        const cartdelete = await cartModel.findOneAndUpdate({ userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
-        res.status(204).send({ status: true, msg: "Cart deleted" })
+        const cartdelete = await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
+        return res.status(204).send({ status: true, msg: "Cart deleted" })
 
     }
     catch (err) {
@@ -303,18 +262,9 @@ const getCart = async function (req, res) {
     try {
 
         let userId = req.params.userId
-        let userIdFromToken = req.userId
-
+       
         if (!isValidObjectId(userId)) {
             return res.send(400).send({ status: false, message: "user id is not valid" })
-        }
-
-        const userByuserId = await userModel.findById(userId)
-        if (!userByuserId) {
-            return res.status(404).send({ status: false, message: "user id doesnt exist" })
-        }
-        if (userId != userIdFromToken) {
-            return res.status(403).send({ status: false, message: "you are not authorized to do this" })
         }
 
         const findCart = await cartModel.findOne({ userId: userId })
@@ -334,44 +284,6 @@ const getCart = async function (req, res) {
         return res.status(500).send({ Status: false, message: err.message })
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = { createCart, deleteCart, updateCart, getCart }

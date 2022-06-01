@@ -36,8 +36,6 @@ const createOrder = async function(req,res){
             return res.status(400).send({Status: false , message: "cart does not exist"})
         }
 
-
-
         //--------------checking userId in cart model , it exist or not -----------------------------//
 
         let checkUserwithCart= await cartModel.findOne({_id:cartId, userId:req.params.userId})

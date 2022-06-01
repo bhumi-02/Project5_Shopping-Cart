@@ -33,7 +33,7 @@ router.post("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartC
 
 router.put("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartController.updateCart)
 
-router.delete('/users/:userId/cart', middleWare.Mid1, cartController.deleteCart)
+router.delete('/users/:userId/cart', middleWare.Mid1,middleWare.authorisation, cartController.deleteCart)
 
 router.get("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartController.getCart)
 
