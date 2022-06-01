@@ -28,12 +28,8 @@ const createOrder = async function(req,res){
                 return res.status(400).send({Status: false , message: "Please enter valid cartId"})
         }
 
-        // let checkCartId = await cartModel.findById({_id:cartId})
-        // if(!checkCartId){
-        //         return res.status(400).send({Status: false , message: "no cart found"})   
-        // }
-        
         //--------------checking userId in cart model , it exist or not -----------------------------//
+        
         let checkUserwithCart= await cartModel.findOne({_id:cartId, userId:req.params.userId})
         if(!checkUserwithCart){
             return res.status(400).send({Status: false , message: "no cart found with this userId/cartId"})
@@ -42,7 +38,6 @@ const createOrder = async function(req,res){
         if(checkUserwithCart.items.length === 0){
             return res.status(400).send({Status: false , message: "sorry cart has no items"})
         }
-
 
 
         if(checkUserwithCart.items.length>0){
@@ -73,14 +68,7 @@ const createOrder = async function(req,res){
             }
         }
 
-        let DuplicateOrder= await orderModel.findOne({userId:req.params.userId,isDeleted:false})
-       
-       if(DuplicateOrder){
-    
-        if(DuplicateOrder.status === "pending" || DuplicateOrder.status === "completed" ){
-            return res.status(400).send({Status: false , message: "You have already processed an order"})
-        }
-       }
+
 
         body.totalItems = checkUserwithCart.totalItems
         body.items = checkUserwithCart.items
