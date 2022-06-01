@@ -21,7 +21,7 @@ const createOrder = async function(req,res){
 
         if(cartId || cartId == ""){
             if(!isValidObjectId(cartId)){
-                return res.status(400).send({Status: false , message: "Please enter valid cart it"})
+                return res.status(400).send({Status: false , message: "Please enter valid cartId"})
             }
             let checkCartId = await cartModel.findById({_id:cartId})
             if(!checkCartId){
@@ -62,17 +62,78 @@ const createOrder = async function(req,res){
             }
         }
 
+        let DuplicateOrder= await orderModel.findOne({userId:req.params.userId})
+       
+       if(DuplicateOrder){
+    
+        if(DuplicateOrder.status === "pending" || DuplicateOrder.status === "completed" ){
+            return res.status(400).send({Status: false , message: "You have already processed an order"})
+        }
+       }
+
         body.totalItems = checkUserwithCart.totalItems
         body.items = checkUserwithCart.items
         body.totalPrice = checkUserwithCart.totalPrice
         body.userId=req.params.userId
         
-
         let createOrder = await orderModel.create(body)
 
         let findCreatedOrder =await orderModel.findById({_id:createOrder._id}).select({ "__v": 0})
 
         return res.status(201).send({ status: true, message: "Success", data: findCreatedOrder })
+
+    }catch(err){
+        return res.status(500).send({Status: false , message: err.message})
+    }
+}
+
+
+const updateOrder= async function(req,res){
+    try{
+
+        let body=req.body
+
+        let {orderId}=body
+
+        if(Object.keys(body).length === 0 ){
+            return res.status(400).send({Status: false , message: "Please provide data"})   
+        }
+
+        if(!orderId || orderId == ""){
+            return res.status(400).send({Status: false , message: "Please provide orderId"})
+        }
+        if(!isValidObjectId(orderId)){
+            return res.status(400).send({Status: false , message: "Please provide valid orderId"})  
+        }
+
+        let checkUser= await orderModel.findOne({userId:req.params.userId})
+        if(!checkUser){
+            return res.status(404).send({Status: false , message: "user has not created any order"})   
+        }
+        let checkOrder = await orderModel.findById({_id:orderId})
+        if(!checkOrder){
+            return res.status(404).send({Status: false , message: "no order found with given orderId"})   
+        }
+
+        if(checkOrder.userId != req.params.userId){
+            return res.status(400).send({Status: false , message: "This user does not exist this order"}) 
+        }
+
+        if(checkOrder.status === "cancelled"){
+            return res.status(400).send({Status: false , message: "Your order has been cancelled"})  
+        }
+
+        if(checkOrder.cancellable == true){
+            let updateOrderDetail= await orderModel.findByIdAndUpdate({_id:orderId},{status:"cancelled"},{new:true}).select({ "__v": 0})
+
+            if(!updateOrderDetail){
+                return res.status(400).send({Status: false , message: "Sorry it can not be cancelled"})   
+            }
+
+            return res.status(200).send({ status: true, message: "Success", data: updateOrderDetail })
+        }
+
+        return res.status(400).send({Status: false , message: "You can not cancelled the this Item"})
 
 
     }catch(err){
@@ -81,4 +142,4 @@ const createOrder = async function(req,res){
 }
 
 
-module.exports={createOrder}
+module.exports={createOrder,updateOrder}

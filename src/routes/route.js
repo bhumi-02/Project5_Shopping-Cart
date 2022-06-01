@@ -41,7 +41,7 @@ router.get("/users/:userId/cart",middleWare.Mid1,middleWare.authorisation,cartCo
 
 router.post("/users/:userId/orders",middleWare.Mid1,middleWare.authorisation,orderController.createOrder)
 
-
+router.put("/users/:userId/orders",middleWare.Mid1,middleWare.authorisation,orderController.updateOrder)
 
 
 module.exports = router;
