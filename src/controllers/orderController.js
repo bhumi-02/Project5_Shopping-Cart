@@ -17,22 +17,29 @@ const createOrder = async function(req,res){
     try{
         let body = req.body
 
+        if(Object.keys(body).length===0){
+            return res.status(400).send({Status: false , message: "Please enter vsome data in body"})
+        }
+
         let{cartId,status,cancellable}=body
 
-        if(cartId || cartId == ""){
-            if(!isValidObjectId(cartId)){
+      
+        if(!isValidObjectId(cartId)){
                 return res.status(400).send({Status: false , message: "Please enter valid cartId"})
-            }
-            let checkCartId = await cartModel.findById({_id:cartId})
-            if(!checkCartId){
-                return res.status(400).send({Status: false , message: "no cart found"})   
-            }
         }
+
+        let checkCartId = await cartModel.findById({_id:cartId})
+        if(!checkCartId){
+                return res.status(400).send({Status: false , message: "no cart found"})   
+        }
+        
         //--------------checking userId in cart model , it exist or not -----------------------------//
-        let checkUserwithCart= await cartModel.findOne({userId:req.params.userId})
+        let checkUserwithCart= await cartModel.findOne({_id:cartId, userId:req.params.userId})
         if(!checkUserwithCart){
             return res.status(400).send({Status: false , message: "no cart found with this user"})
         }
+
+       
 
         if(checkUserwithCart.items.length>0){
             let sum = 0
@@ -45,7 +52,7 @@ const createOrder = async function(req,res){
 
         if(status || status == ""){
             status = status.toLowerCase()
-            if(status == "pending" ||status == "completed" || status == "cancled" ){
+            if(status == "pending" ||status == "completed" || status == "cancelled" ){
                 body.status = status
             }else{
                 return res.status(400).send({Status: false , message: "Please enter valid status"})
