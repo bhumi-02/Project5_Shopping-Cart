@@ -18,7 +18,7 @@ const createOrder = async function(req,res){
         let body = req.body
 
         if(Object.keys(body).length===0){
-            return res.status(400).send({Status: false , message: "Please enter vsome data in body"})
+            return res.status(400).send({Status: false , message: "Please enter some data in body"})
         }
 
         let{cartId,status,cancellable}=body
@@ -28,26 +28,24 @@ const createOrder = async function(req,res){
                 return res.status(400).send({Status: false , message: "Please enter valid cartId"})
         }
 
-        let checkCartId = await cartModel.findById({_id:cartId})
-        if(!checkCartId){
-                return res.status(400).send({Status: false , message: "no cart found"})   
-        }
+        // let checkCartId = await cartModel.findById({_id:cartId})
+        // if(!checkCartId){
+        //         return res.status(400).send({Status: false , message: "no cart found"})   
+        // }
         
         //--------------checking userId in cart model , it exist or not -----------------------------//
         let checkUserwithCart= await cartModel.findOne({_id:cartId, userId:req.params.userId})
         if(!checkUserwithCart){
-            return res.status(400).send({Status: false , message: "no cart found with this user"})
+            return res.status(400).send({Status: false , message: "no cart found with this user/cartId"})
         }
 
+        let DuplicateOrder= await orderModel.findOne({userId:req.params.userId,isDeleted:false})
        
-
-        if(checkUserwithCart.items.length>0){
-            let sum = 0
-
-            for(let i = 0 ; i<checkUserwithCart.items.length; i++ ){
-                sum =sum + checkUserwithCart.items[i].quantity  
-            }
-            body.totalQuantity=sum     // this one is calculating total quantity
+        if(DuplicateOrder){
+     
+         if(DuplicateOrder.status === "pending" || DuplicateOrder.status === "completed" ){
+             return res.status(400).send({Status: false , message: "You have already processed an order"})
+         }
         }
 
         if(status || status == ""){
@@ -69,25 +67,27 @@ const createOrder = async function(req,res){
             }
         }
 
-        let DuplicateOrder= await orderModel.findOne({userId:req.params.userId,isDeleted:false})
-       
-       if(DuplicateOrder){
+        if(checkUserwithCart.items.length>0){
+            let sum = 0
+
+            for(let i = 0 ; i<checkUserwithCart.items.length; i++ ){
+                sum =sum + checkUserwithCart.items[i].quantity  
+            }
+            body.totalQuantity=sum     // this one is calculating total quantity
+            body.totalItems = checkUserwithCart.totalItems
+            body.items = checkUserwithCart.items
+            body.totalPrice = checkUserwithCart.totalPrice
+            body.userId=req.params.userId
+            
+            let createOrder = await orderModel.create(body)
     
-        if(DuplicateOrder.status === "pending" || DuplicateOrder.status === "completed" ){
-            return res.status(400).send({Status: false , message: "You have already processed an order"})
+            let findCreatedOrder =await orderModel.findById({_id:createOrder._id}).select({ "__v": 0})
+    
+            return res.status(201).send({ status: true, message: "Success", data: findCreatedOrder })
         }
-       }
 
-        body.totalItems = checkUserwithCart.totalItems
-        body.items = checkUserwithCart.items
-        body.totalPrice = checkUserwithCart.totalPrice
-        body.userId=req.params.userId
-        
-        let createOrder = await orderModel.create(body)
+        return res.status(400).send({Status: false , message: "cart is empty"})
 
-        let findCreatedOrder =await orderModel.findById({_id:createOrder._id}).select({ "__v": 0})
-
-        return res.status(201).send({ status: true, message: "Success", data: findCreatedOrder })
 
     }catch(err){
         return res.status(500).send({Status: false , message: err.message})
