@@ -24,7 +24,7 @@ router.delete("/products/:productId",productController.deleteProduct)
 router.put("/products/:productId",productController.UpdateProduct)
 
 router.get("/products",productController.getProduct)
-
+6
 router.get("/products/:productId",productController.getProductById)
 
 //----------------Cart API ---------------------------------------------------------//

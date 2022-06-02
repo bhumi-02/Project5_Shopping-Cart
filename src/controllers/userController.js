@@ -1,7 +1,7 @@
 const userModel = require("../models/userModel")
 const bcrypt = require('bcrypt');
-const mongoose=require("mongoose")
-const {uploadFile}=require("../aws/awsController")
+const mongoose = require("mongoose")
+const { uploadFile } = require("../aws/awsController")
 
 
 //------------------------------Regex Validation---------------------------------------------------//
@@ -14,7 +14,7 @@ let mobileRegex = /^[6-9]{1}[0-9]{9}$/
 let streetRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9./ ,-]{1,10000}$/
 let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
 
-const isValidObjectId=function(ObjectId){
+const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 //---------------------------------------------------------------------------------//
@@ -30,7 +30,7 @@ const isValid = function (value) {
     }
 }
 
-//-----------------------------------------------------------------------------------------//
+// ************************************************************* POST /register ************************************************************ //
 
 const createUser = async function (req, res) {
     try {
@@ -168,7 +168,7 @@ const createUser = async function (req, res) {
 
         let uploadedFileURL = await uploadFile(files[0])
 
-        if(!uploadedFileURL){
+        if (!uploadedFileURL) {
             return res.status(400).send({ Status: false, message: "Image could not be upload" })
         }
 
@@ -188,38 +188,46 @@ const createUser = async function (req, res) {
     }
 }
 
+// ************************************************************* GET /user/:userId/profile *********************************************************** //
+const getUser = async function (req, res) {
 
+    try {
 
+        const userId = req.params.userId
+        const userIdFromToken = req.userId
+        if (!isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, message: "valid userId is required" })
+        }
+        if (userIdFromToken != userId) {
+            return res.status(401).send({ status: false, message: "unauthorized access" })
+        }
+        const userGet = await userModel.findOne({ _id: userId })
+        if (!userGet)
+            return res.status(400).send({ status: false, message: "no data found with user Id" })
+
+        return res.status(200).send({ status: true, message: "user Details", data: userGet })
+
+    } catch (err) {
+        return res.status(500).send({ Status: false, message: err.message })
+    }
+
+}
+
+// ************************************************************* PUT /user/:userId/profile  ************************************************************ //
 const updateData = async function (req, res) {
     try {
         let body = JSON.parse(JSON.stringify(req.body))
         let files = req.files
         let User_id = req.params.userId
-        // const userToken = req.userId
 
-        // if (!isValidObjectId(User_id)) {
-        //     return res.status(400).send({ status: false, messsage: "plzz enter valid user id" })
-        // }
-       
-        // //-------------Authorization---------------------------------------------------------------------------//
-        // let CheckUser = await userModel.findById({ _id: User_id })
-        // if (CheckUser) {
-        //     if (CheckUser._id != userToken) {
-        //         return res.status(400).send({ Status: false, message: "Sorry you are not authorise person" })
-        //     }
-        // }
-        // else {
-        //     return res.status(400).send({ Status: false, message: "User id is not valid" })
-        // }
-        //-----------------------------------------------------------------------------------------------------------//      
-        let{fname, lname, email, phone, password, address, profileImage} = body;
+        let { fname, lname, email, phone, password, address, profileImage } = body;
 
-        if (Object.keys(body).length === 0 ) {
+        if (Object.keys(body).length === 0) {
             return res.status(400).send({ Status: false, message: "Please provide the data" })
         }
 
-        if (fname === "" || fname ) {
-            if (!stringRegex.test(fname) ) {
+        if (fname === "" || fname) {
+            if (!stringRegex.test(fname)) {
                 return res.status(400).send({ Status: false, message: "first name is not valid" })
             }
 
@@ -236,7 +244,7 @@ const updateData = async function (req, res) {
             if (!EmailRegex.test(email)) {
                 return res.status(400).send({ Status: false, message: "email is not valid" })
             }
-            email=email.toLowerCase().trim()
+            email = email.toLowerCase().trim()
         }
         if (phone || phone === "") {
             if (!mobileRegex.test(phone)) {
@@ -246,21 +254,21 @@ const updateData = async function (req, res) {
 
         //---------------------------------------Email and Phone uniqcheck -----------------------------------------//
 
-         
-            let uniqueCheck = await userModel.findOne({ email:email  })
-            if (uniqueCheck) {
-                if (uniqueCheck.email) {
-                    return res.status(400).send({ Status: false, message: "This email has been used already" })
-                }
+
+        let uniqueCheck = await userModel.findOne({ email: email })
+        if (uniqueCheck) {
+            if (uniqueCheck.email) {
+                return res.status(400).send({ Status: false, message: "This email has been used already" })
             }
-            let checkPhone = await userModel.findOne({ phone: phone })
-            if (checkPhone){
+        }
+        let checkPhone = await userModel.findOne({ phone: phone })
+        if (checkPhone) {
 
             if (checkPhone.phone) {
                 return res.status(400).send({ Status: false, message: "This Phone has been used already" })
             }
         }
-        
+
         //----------------------------------If user wants to update the Password--------------------------------------------------------//
 
         if (password || password === "") {
@@ -271,16 +279,16 @@ const updateData = async function (req, res) {
         }
         //------------------------------------------Address validation------------------------------------------------------------------//
 
-        if(address === ""){
+        if (address === "") {
             return res.status(400).send({ Status: false, message: "Please provide the valid address data" })
         }
-        
 
-        if (address ) {
+
+        if (address) {
 
             address = JSON.parse(address)
 
-            console.log("help   ",address)
+            console.log("help   ", address)
 
             if (Object.keys(address).length === 0) {
                 return res.status(400).send({ Status: false, message: "Please provide the address data" })
@@ -290,14 +298,12 @@ const updateData = async function (req, res) {
 
             console.log("Okay   ", shipping)
 
-           
-
             //-------------------------If user wants to Update Shipping Address ------------------------------------//
-            if(shipping === "" || shipping === {} ){
+            if (shipping === "" || shipping === {}) {
                 return res.status(400).send({ Status: false, message: "Please provide the valid shipping address data" })
             }
-           
-            if (shipping ) {
+
+            if (shipping) {
 
                 if (shipping.street || shipping.street === "") {
                     if (!streetRegex.test(shipping.street)) {
@@ -333,7 +339,7 @@ const updateData = async function (req, res) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid billing city address" })
                     }
                 }
-                if (billing.pincode || billing.pincode === "" ) {
+                if (billing.pincode || billing.pincode === "") {
                     if (!pinRegex.test(billing.pincode)) {
                         return res.status(400).send({ Status: false, message: "Please enter the valid billing pin code" })
                     }
@@ -353,13 +359,13 @@ const updateData = async function (req, res) {
             let uploadedFileURL = await uploadFile(files[0])
             body.profileImage = uploadedFileURL
 
-            let updateProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email:email, phone: phone, profileImage: profileImage, address: address }, { new: true })
+            let updateProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email: email, phone: phone, profileImage: profileImage, address: address }, { new: true })
 
             return res.status(200).send({ Status: true, data: updateProfile })
         }
         //----------------------------------If User does not want update Profile Image------------------------------------------------------------//
 
-        let changeProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email:email, phone: phone, profileImage: profileImage, address: address }, { new: true })
+        let changeProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email: email, phone: phone, profileImage: profileImage, address: address }, { new: true })
 
         return res.status(200).send({ Status: true, data: changeProfile })
 
@@ -368,38 +374,4 @@ const updateData = async function (req, res) {
     }
 }
 
-
-
-//get api
-const getUser=async function (req,res){
-
-try{
-
-    const userId=req.params.userId
-    const userIdFromToken= req.userId
-    if(!isValidObjectId(userId)){
-        return res.status(400).send({status:false,message:"valid userId is required"})
-    }
-    if(userIdFromToken!=userId){
-        return res.status(401).send({status:false,message:"unauthorized access"})
-    }
-    const userGet=await userModel.findOne({_id:userId})
-    if(!userGet)
-        return res.status(400).send({status:false,message:"no data found with user Id"})
-    
-    return res.status(200).send({status:true,message:"user Details",data:userGet})
-
-} catch (err) {
-    return res.status(500).send({ Status: false, message: err.message })
-}
-
-}
-
-
-
-
-
-
-
-
-module.exports = { createUser, updateData,getUser }
+module.exports = { createUser, updateData, getUser }

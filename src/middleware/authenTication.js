@@ -14,10 +14,7 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-
-//------------------------------------------------------------------------------------------//
-
-
+// ************************************************************* POST /login ************************************************************ //
 const login= async function(req,res){
     try{
         let body= req.body

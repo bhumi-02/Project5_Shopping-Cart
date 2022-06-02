@@ -10,8 +10,7 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-//--------------------------------------------------------------------------//
-
+// ************************************************************* POST /users/:userId/orders *********************************************************** //
 
 const createOrder = async function(req,res){
     try{
@@ -76,8 +75,6 @@ const createOrder = async function(req,res){
             }
         }
 
-
-
         body.totalItems = checkUserwithCart.totalItems
         body.items = checkUserwithCart.items
         body.totalPrice = checkUserwithCart.totalPrice
@@ -94,7 +91,7 @@ const createOrder = async function(req,res){
     }
 }
 
-
+// ************************************************************* PUT /users/:userId/orders  *********************************************************** //
 const updateOrder= async function(req,res){
     try{
 

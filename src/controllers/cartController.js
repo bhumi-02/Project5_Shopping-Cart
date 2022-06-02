@@ -15,13 +15,9 @@ const isValidObjectId = function (ObjectId) {
 }
 
 let digitRegex = /^[1-9]{1}[0-9]{0,10000}$/
-
 let removeProductRegex = /^[0-1]{1}$/
 
-
-//------------------------------------------------------validations ends here------------------------------------------------------//
-
-
+// **************************************** POST /users/:userId/cart ********************************************************//
 const createCart = async (req, res) => {
     try {
 
@@ -43,11 +39,11 @@ const createCart = async (req, res) => {
         if (!isProductPresent) {
             return res.status(404).send({ status: false, messsage: `product not found by this prodct id ${productId}` })
         }
-        if(quantity === ""){
+        if (quantity === "") {
             return res.status(400).send({ status: false, messsage: "plzz enter valid quatity , please use digit" })
         }
-        if(!quantity){
-             quantity=1
+        if (!quantity) {
+            quantity = 1
         }
         if (quantity) {
             if (!digitRegex.test(quantity)) {
@@ -55,7 +51,7 @@ const createCart = async (req, res) => {
             }
         }
 
-       
+
         if (typeof quantity === "string") {
             return res.status(400).send({ status: false, messsage: "plzz enter quantity in Number not as an including string" })
         }
@@ -83,10 +79,10 @@ const createCart = async (req, res) => {
                 return res.status(400).send({ status: false, messsage: "plzz enter cartId" })
             }
 
-            let existCart = await cartModel.findById({ _id: cartId })
+            let existCart = await cartModel.findOne({ _id: cartId, userId: userIdbyParams })
 
             if (!existCart) {
-                return res.status(400).send({ status: false, messsage: "does not exist cartId" })
+                return res.status(400).send({ status: false, messsage: "does not exist cartId with given user / cart does not exist" })
             }
 
             if (existCart) {
@@ -98,7 +94,7 @@ const createCart = async (req, res) => {
 
                         totalPrice = (existCart.totalPrice) + (isProductPresent.price * quantity)
 
-                        let updatnewCart = await cartModel.findOneAndUpdate({ userId: userIdbyParams }, { items: items, totalPrice: totalPrice }, { new: true }).select({ "__v": 0 })
+                        let updatnewCart = await cartModel.findOneAndUpdate({ id: cartId, userId: userIdbyParams }, { items: items, totalPrice: totalPrice }, { new: true }).select({ "_v": 0 })
 
                         return res.status(201).send({ status: true, message: "product added success", data: updatnewCart })
                     }
@@ -106,9 +102,6 @@ const createCart = async (req, res) => {
             }
 
         }
-
-        //----------------------------------------------------------------------------------------------------------//
-
         let addingCart = await cartModel.findOneAndUpdate({ userId: userIdbyParams }, { $push: { items: data.items }, $inc: { totalPrice: data.totalPrice, totalItems: data.totalItems } }, { new: true }).select({ "__v": 0 })
 
         if (addingCart) {
@@ -121,7 +114,7 @@ const createCart = async (req, res) => {
 
         //------------this line is being use to remove _V:0   ---------------------------------------------//
 
-        let findData = await cartModel.findOne({ _id: createCart._id }).select({ "__v": 0 })
+        let findData = await cartModel.findOne({ id: createCart._id }).select({ "_v": 0 })
 
         return res.status(201).send({ status: true, message: "cart added", data: findData })
 
@@ -129,29 +122,7 @@ const createCart = async (req, res) => {
         return res.status(500).send({ Status: false, message: err.message })
     }
 }
-// ******************************************************** DELETE /users/:userId/cart ******************************************************* //
-const deleteCart = async function (req, res) {
-    try {
-        // Validate params
-        userId = req.params.userId
-
-        // To check cart is present or not
-        const cartSearch = await cartModel.findOne({userId: userId })
-        if (!cartSearch) {
-            return res.status(404).send({ status: false, msg: "cart doesnot exist" })
-        }
-
-        const cartdelete = await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
-        return res.status(204).send({ status: true, msg: "Cart deleted" })
-
-    }
-    catch (err) {
-        //console.log("This is the error :", err.message)
-        res.status(500).send({ msg: "Error", error: err.message })
-    }
-}
-
-// ******************************************************** put api***********************
+// ******************************************************************** PUT /users/:userId/cart **********************************************************************************//
 
 const updateCart = async function (req, res) {
     try {
@@ -178,15 +149,15 @@ const updateCart = async function (req, res) {
         if (!removeProduct) {
             return res.status(400).send({ status: true, message: "Please provide removeProduct in body" })
         }
-        if(!removeProductRegex.test(removeProduct)){
-            return res.status(400).send({ status: true, message: "removeProduct must be 0 or 1" }) 
+        if (!removeProductRegex.test(removeProduct)) {
+            return res.status(400).send({ status: true, message: "removeProduct must be 0 or 1" })
         }
-   
+
         let cart = await cartModel.findById({ _id: cartId })
         if (!cart) {
             return res.status(404).send({ status: false, msg: "Cart not found" })
         }
-        
+
         if (cart.totalPrice == "0" || cart.totalItems == "0") {
             return res.status(400).send({ status: false, msg: "Cart is empty" })
         }
@@ -203,28 +174,28 @@ const updateCart = async function (req, res) {
         if (removeProduct == 0) {
 
             for (let i = 0; i < cart.items.length; i++) {
-           
+
                 if (cart.items[i].productId == productId) {
 
                     const productPrice = product.price * cart.items[i].quantity
 
                     const updatePrice = cart.totalPrice - productPrice
 
-                    cart.items.splice(i,1)
-                   
+                    cart.items.splice(i, 1)
+
                     let updateItems = cart.totalItems - 1
                     const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
 
                     return res.status(200).send({ status: true, msg: "Succesfully Updated in the cart", data: updateItemsAndPrice })
-                }   
+                }
             }
-            
+
         }
-      
+
         if (removeProduct == 1) {
             for (let i = 0; i < cart.items.length; i++) {
                 if (cart.items[i].productId == productId) {
-                    cart.items[i].quantity =cart.items[i].quantity - 1
+                    cart.items[i].quantity = cart.items[i].quantity - 1
 
                     if (cart.items[i].quantity < 1) {
                         const updateItems = cart.totalItems - 1
@@ -236,33 +207,29 @@ const updateCart = async function (req, res) {
                         const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
                         return res.status(200).send({ status: true, msg: "Product has been removed successfully from the cart", data: updateItemsAndPrice })
 
-                    } 
+                    }
                     else {
-                        
+
                         const updatedPrice = cart.totalPrice - (product.price * 1)
                         const updatedQuantityAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatedPrice }, { new: true })
                         return res.status(200).send({ status: true, msg: "Quantity has been updated successfully in the cart", data: updatedQuantityAndPrice })
                     }
                 }
-            } 
+            }
         }
-        return res.status(404).send({ status: false, msg: "cart does not exist this prodcut" }) 
+        return res.status(404).send({ status: false, msg: "cart does not exist this prodcut" })
 
     } catch (err) {
         return res.status(500).send({ Status: false, message: err.message })
     }
 }
 
-
-
-
-//------------------------------------------------------Get Api--------------------------------------------------------------------//
-
+// **************************************** GET /users/:userId/cart *****************************************************************************//
 const getCart = async function (req, res) {
     try {
 
         let userId = req.params.userId
-       
+
         if (!isValidObjectId(userId)) {
             return res.send(400).send({ status: false, message: "user id is not valid" })
         }
@@ -285,6 +252,27 @@ const getCart = async function (req, res) {
     }
 }
 
+// ******************************************************** DELETE /users/:userId/cart ******************************************************* //
+const deleteCart = async function (req, res) {
+    try {
+        // Validate params
+        userId = req.params.userId
+
+        // To check cart is present or not
+        const cartSearch = await cartModel.findOne({ userId: userId })
+        if (!cartSearch) {
+            return res.status(404).send({ status: false, msg: "cart doesnot exist" })
+        }
+
+        const cartdelete = await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
+        return res.status(204).send({ status: true, msg: "Cart deleted" })
+
+    }
+    catch (err) {
+        //console.log("This is the error :", err.message)
+        res.status(500).send({ msg: "Error", error: err.message })
+    }
+}
 
 module.exports = { createCart, deleteCart, updateCart, getCart }
 
