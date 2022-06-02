@@ -499,7 +499,7 @@ const deleteProduct = async function (req, res) {
             return res.status(404).send({ status: false, message: "product doesnt exists" })
         }
         if (findproduct.isDeleted == true) {
-            return res.status(404).send({ status: false, message: "product already deleted" })
+            return res.status(404).send({ status: false, message: "product Not Found" })
         }
 
         const deletedDetails = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
