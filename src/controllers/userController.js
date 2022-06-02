@@ -30,7 +30,7 @@ const isValid = function (value) {
     }
 }
 
-// ************************************************************* POST /register ************************************************************ //
+// ************************************************* POST /register ************************************************************ //
 
 const createUser = async function (req, res) {
     try {
@@ -181,14 +181,16 @@ const createUser = async function (req, res) {
         //----------------------------------------User Creation-------------------------------------------------------//
         const createUser = await userModel.create(body)
 
-        return res.status(201).send({ Status: true, data: createUser })
+        let resultUser= await userModel.findOne({_id:createUser._id}).select({"__v": 0})
+
+        return res.status(201).send({ Status: true, data: resultUser })
 
     } catch (err) {
         return res.status(500).send({ Status: false, message: err.message })
     }
 }
 
-// ************************************************************* GET /user/:userId/profile *********************************************************** //
+// ***************************************** GET /user/:userId/profile ************************************************** //
 const getUser = async function (req, res) {
 
     try {
@@ -201,7 +203,7 @@ const getUser = async function (req, res) {
         if (userIdFromToken != userId) {
             return res.status(401).send({ status: false, message: "unauthorized access" })
         }
-        const userGet = await userModel.findOne({ _id: userId })
+        const userGet = await userModel.findOne({ _id: userId }).select({"__v": 0})
         if (!userGet)
             return res.status(400).send({ status: false, message: "no data found with user Id" })
 
@@ -213,7 +215,7 @@ const getUser = async function (req, res) {
 
 }
 
-// ************************************************************* PUT /user/:userId/profile  ************************************************************ //
+// ********************************************* PUT /user/:userId/profile  ***************************************************** //
 const updateData = async function (req, res) {
     try {
         let body = JSON.parse(JSON.stringify(req.body))
@@ -288,15 +290,11 @@ const updateData = async function (req, res) {
 
             address = JSON.parse(address)
 
-            console.log("help   ", address)
-
             if (Object.keys(address).length === 0) {
                 return res.status(400).send({ Status: false, message: "Please provide the address data" })
             }
 
             let { shipping, billing } = address
-
-            console.log("Okay   ", shipping)
 
             //-------------------------If user wants to Update Shipping Address ------------------------------------//
             if (shipping === "" || shipping === {}) {
@@ -359,13 +357,13 @@ const updateData = async function (req, res) {
             let uploadedFileURL = await uploadFile(files[0])
             body.profileImage = uploadedFileURL
 
-            let updateProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email: email, phone: phone, profileImage: profileImage, address: address }, { new: true })
+            let updateProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email: email, phone: phone, profileImage: profileImage, address: address }, { new: true }).select({"__v": 0})
 
             return res.status(200).send({ Status: true, data: updateProfile })
         }
-        //----------------------------------If User does not want update Profile Image------------------------------------------------------------//
+        //----------------------------------If User does not want update Profile Image----------------------------------------------//
 
-        let changeProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email: email, phone: phone, profileImage: profileImage, address: address }, { new: true })
+        let changeProfile = await userModel.findByIdAndUpdate({ _id: User_id }, { fname: fname, lname: lname, password: password, email: email, phone: phone, profileImage: profileImage, address: address }, { new: true }).select({"__v": 0})
 
         return res.status(200).send({ Status: true, data: changeProfile })
 
