@@ -175,81 +175,82 @@ const createProduct = async function (req, res) {
 
 const getProduct = async function (req, res) {
     try {
-        let size = req.query.size
-        let name = req.query.name
+        let data = req.query
         let priceGreaterThan = req.query.priceGreaterThan
         let priceLessThan = req.query.priceLessThan
         let priceSort = req.query.priceSort
-
-
-
-        // Validate of body(It must not be present)
-        const body = req.body;
-        if (!body) {
-            return res.status(400).send({ status: false, msg: "Body must not be present" })
-        }
-
-        // Validate params(it must not be present)
-        const params = req.params;
-        if (!params) {
-            return res.status(400).send({ status: false, msg: "Invalid request" })
-        }
-
-        let data = {}
-
-        // To search size
-        if (size) {
-
-            let sizeSearch = await productModel.find({ availableSizes: size, isDeleted: false }).sort({ price: priceSort })
-            if (sizeSearch.length !== 0) {
-                return res.status(200).send({ status: true, msg: "Success", data: sizeSearch })
-            }
-            else {
-                return res.status(400).send({ status: false, msg: "No products exist" })
+        let name = req.query.name
+        let availableSizes = req.query.size;
+        let title = name
+        //console.log(availableSizes)
+        //Fetching all products
+        if (Object.keys(data).length == 0) {
+            let allProdtucts = await productModel.find({ isDeleted: false })
+            if (allProdtucts) {
+                return res.status(200).send({ status: true, message: 'Success', data: allProdtucts })
             }
         }
-
-        // To find products with name
-        if (name) {
-            let nameSearch = await productModel.find({ title: { $regex: name }, isDeleted: false }).sort({ price: priceSort })
-            if (nameSearch.length !== 0) {
-                return res.status(200).send({ status: true, msg: "Success", data: nameSearch })
+        //Fetchin products using filters,
+        if (title) {
+            let filteredProducts = await productModel.find({ isDeleted: false, title: title }).collation({ locale: 'en', strength: 2 })
+            if (filteredProducts.length === 0) {
+                return res.status(404).send({ status: false, message: 'No Products Found' })
             }
-            else {
-                return res.status(400).send({ status: false, msg: "No products exist" })
+            return res.status(200).send({ status: true, message: 'Success', data: filteredProducts })
+        }
+        if (availableSizes) {
+            filteredProducts = await productModel.find({ isDeleted: false, availableSizes: availableSizes })
+            return res.status(200).send({ status: false, message: 'Succes', data: filteredProducts })
+        }
+        if (priceSort) {
+            if (!priceSort == 1 || !priceSort == -1) {
+                return res.status(400).send({ status: false, message: 'Plz, Provide priceSort as 1 or -1' })
             }
         }
 
-        // To find the price
+        // price range handling
+        if (priceGreaterThan && priceLessThan) {
+            if (priceGreaterThan === priceLessThan) {
+                return res.status(400).send({ status: false, message: 'Plz, Provide valid price range' })
+            }
+
+            let productFound = await productModel.find({
+                $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } },
+                { price: { $lt: priceLessThan } }]
+            }).sort({ price: priceSort })
+            if (productFound.length === 0) {
+                return res.status(400).send({ status: false, message: "No products found" })
+
+            }
+            return res.status(200).send({ status: true, message: "Success", data: productFound })
+
+        }
+
         if (priceGreaterThan) {
-            data["$gt"] = priceGreaterThan
-        }
-        if (priceLessThan) {
-            data["$lt"] = priceLessThan
-        }
-        if (priceLessThan || priceGreaterThan || size || name || priceSort) {
-            let searchPrice = await productModel.find({ price: data, isDeleted: false }).sort({ price: priceSort })
+            let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $gt: priceGreaterThan } }] }).sort({ price: priceSort })
+            console.log(productFound)
+            if (productFound.length === 0) {
+                return res.status(400).send({ status: false, message: "No available products" })
+            }
+            return res.status(200).send({ status: true, message: "Success", data: productFound })
 
-            if (searchPrice.length !== 0) {
-                return res.status(200).send({ status: true, msg: "Success", data: searchPrice })
-            }
-            else {
-                return res.status(400).send({ status: false, msg: "No products exist" })
-            }
+
         }
-        let finalProduct = await productModel.find(data).sort({ price: priceSort })
-        if (finalProduct !== 0) {
-            return res.status(200).send({ status: true, msg: "Success", data: finalProduct })
-        }
-        else {
-            return res.status(404).send({ status: false, msg: "No product exist" })
+        else if (priceLessThan) {
+            let productFound = await productModel.find({ $and: [{ isDeleted: false }, { price: { $lt: priceLessThan } }] }).sort({ price: priceSort })
+            if (productFound.length === 0) {
+                return res.status(400).send({ status: false, message: 'No available products' })
+            }
+            return res.status(200).send({ status: true, message: "Success", data: productFound })
+
         }
     }
-    catch (err) {
-        console.log("This is the error :", err.message)
-        res.status(500).send({ msg: "Error", error: err.message })
+    catch (error) {
+        res.status(500).send({ status: false, message: error.message })
     }
+
 }
+
 // ******************************************************** GET /products/:productId ******************************************************* //
 
 const getProductById = async function (req, res) {

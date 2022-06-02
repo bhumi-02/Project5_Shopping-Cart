@@ -6,12 +6,12 @@ const {uploadFile}=require("../aws/awsController")
 
 //------------------------------Regex Validation---------------------------------------------------//
 
-let stringRegex = /^[A-Za-z]{1}[A-Za-z .]{1,1000}$/
+let stringRegex = /^[A-Za-z]{1}[A-Za-z]{1,1000}$/
 let EmailRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9._]{1,}@[A-Za-z1-9]{2,15}[.]{1}[A-Za-z.]{2,15}$/
 let pinRegex = /^[1-9]{1}[0-9]{5}$/
 let mobileRegex = /^[6-9]{1}[0-9]{9}$/
 
-let streetRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9/ ,-]{1,10000}$/
+let streetRegex = /^[A-Za-z1-9]{1}[A-Za-z0-9./ ,-]{1,10000}$/
 let Passwordregex = /^[A-Z0-9a-z]{1}[A-Za-z0-9.@#$&]{7,14}$/
 
 const isValidObjectId=function(ObjectId){
