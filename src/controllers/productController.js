@@ -186,7 +186,7 @@ if (size) {
             if(priceSort){
                 if(priceSort == 1 || priceSort == -1){
 
-                    let checkProduct= await productModel.find(filter).sort({price:priceSort})
+                    let checkProduct= await productModel.find(filter).collation({ locale: 'en', strength: 2 }).sort({price:priceSort})
 
                     if(checkProduct.length === 0){
                         return res.status(404).send({ Status: false, message: "No product found" })
@@ -197,7 +197,7 @@ if (size) {
                 return res.status(404).send({ Status: false, message: "Please enter valid priceSort" })
             }
 
-            let checkProduct= await productModel.find(filter)
+            let checkProduct= await productModel.find(filter).collation({ locale: 'en', strength: 2 })
             if(checkProduct.length===0){
                 return res.status(404).send({ Status: false, message: "No product found" })
             }
