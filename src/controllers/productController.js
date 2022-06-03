@@ -167,8 +167,8 @@ const getProduct = async function (req, res) {
                 return res.status(400).send({ Status: false, message: "Please give valid title" })
             }
 
-            filter.title =  name
-            // filter["title"] = { $regex: name };
+            // filter.title =  name
+             filter["title"] = { $regex: name };     // please first letter as a capital
             // filter['title']['$regex'] = name
             // filter['title']['$regex: $options'] = 'i'
         }
