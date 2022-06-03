@@ -218,6 +218,9 @@ const getUser = async function (req, res) {
 // ********************************************* PUT /user/:userId/profile  ***************************************************** //
 const updateData = async function (req, res) {
     try {
+
+
+
         let body = JSON.parse(JSON.stringify(req.body))
         let files = req.files
         let User_id = req.params.userId
@@ -352,6 +355,8 @@ const updateData = async function (req, res) {
                 return res.status(400).send({ Status: false, message: "Please upload the image" })
             }
         }
+
+       
         if (files && files.length > 0) {
 
             let uploadedFileURL = await uploadFile(files[0])

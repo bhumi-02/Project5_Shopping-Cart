@@ -21,6 +21,7 @@ const createProduct = async function (req, res) {
         let data = JSON.parse(JSON.stringify(req.body))
 
         let files = req.files
+
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "plzz enter some  data " })
         }
@@ -141,10 +142,6 @@ const getProduct = async function (req, res) {
 
         let data = req.query
 
-        // if (Object.keys(data).length === 0) {
-        //     return res.status(400).send({ Status: false, message: "Please put some data in query params" })
-        // }
-
         let { size, name, priceGreaterThan, priceLessThan, priceSort } = data
 
         let filter = { isDeleted: false }
@@ -248,16 +245,23 @@ const getProductById = async function (req, res) {
 const UpdateProduct = async function (req, res) {
     try {
 
-        
+
         let productId = req.params.productId
+
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "product id is invalid" })
         }
+
         let checkProductId = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProductId) {
             return res.status(400).send({ status: false, msg: "the product id is not valid/deleted product" })
         }
         let data = JSON.parse(JSON.stringify(req.body))
+
+        if(Object.keys(data).length ===0){
+            return res.status(400).send({ status: false, message: "Please provide data to update" })
+        }
+
         let files = req.files
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, isDeleted } = data
 
