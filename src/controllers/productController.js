@@ -395,7 +395,7 @@ const UpdateProduct = async function (req, res) {
         if (!updateData) {
             return res.status(400).send({ status: false, message: "No data found to update" })
         }
-        return res.status(201).send({ status: true, message: "Success", data: updateData })
+        return res.status(200).send({ status: true, message: "Success", data: updateData })
 
     } catch (err) {
         res.status(500).send({ msg: "Error", error: err.message })
