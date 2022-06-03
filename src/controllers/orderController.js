@@ -3,6 +3,7 @@ const orderModel = require("../models/orderModel")
 const productModel=require("../models/productModel")
 const userModel = require("../models/userModel")
 const mongoose =require("mongoose")
+const { status } = require("express/lib/response")
 
 
 //--------------------------------------------------------------------------//
@@ -97,7 +98,7 @@ const updateOrder= async function(req,res){
 
         let body=req.body
 
-        let {orderId}=body
+        let {orderId,status}=body
 
         if(Object.keys(body).length === 0 ){
             return res.status(400).send({Status: false , message: "Please provide data"})   
@@ -137,7 +138,23 @@ const updateOrder= async function(req,res){
             return res.status(200).send({ status: true, message: "Success", data: updateOrderDetail })
         }
 
-        return res.status(400).send({Status: false , message: "You can not cancelled this Item"})
+        if(!status){
+            return res.status(400).send({Status: false , message: "Please enter status"}) 
+        }
+
+        if(status || status == ""){
+            status = status.toLowerCase()
+            if(status == "pending" ||status == "completed" || status == "cancelled" ){
+                body.status = status
+            }else{
+                return res.status(400).send({Status: false , message: "Please enter valid status"})
+            }
+        }
+        
+        let updateOrderDetail= await orderModel.findOneAndUpdate({_id:orderId,isDeleted:false},{status:status},{new:true}).select({ "__v": 0})
+
+
+        return res.status(200).send({Status: true , message: "Success",data:updateOrderDetail})
 
 
     }catch(err){
