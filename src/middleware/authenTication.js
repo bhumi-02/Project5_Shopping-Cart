@@ -60,7 +60,7 @@ const login= async function(req,res){
 
         let result={}
         result={userId,token}
-        return res.status(201).send({ status: true, message: "User login successfull", data: result})
+        return res.status(200).send({ status: true, message: "User login successfull", data: result})
 
     }catch(err){
         return res.status(500).send({ Status: false, message: err.message })

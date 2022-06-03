@@ -247,6 +247,8 @@ const getProductById = async function (req, res) {
 // *********************************************  PUT /products/:productId ******************************************* //
 const UpdateProduct = async function (req, res) {
     try {
+
+        
         let productId = req.params.productId
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "product id is invalid" })
