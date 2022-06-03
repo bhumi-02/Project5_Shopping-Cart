@@ -9,7 +9,7 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
-let stringRegex = /^[A-Za-z]{1}[A-Za-z 0-9-_.]{1,1000}$/
+let stringRegex = /^[A-Za-z]{1}[A-Za-z 0-9-_.]{0,1000}$/
 let descriptionRegex = /^[A-Za-z1-9]{1}[A-Za-z 0-9.@#-_*]{1,10000}$/
 let priceRegex = /^\d+(,\d{3})*(\.\d{1,2})?$/
 let numberPattern = /^[0-9]{1}[0-9]{0,1000}$/
@@ -167,7 +167,10 @@ const getProduct = async function (req, res) {
                 return res.status(400).send({ Status: false, message: "Please give valid title" })
             }
 
-            filter.title = name
+            filter.title =  name
+            // filter["title"] = { $regex: name };
+            // filter['title']['$regex'] = name
+            // filter['title']['$regex: $options'] = 'i'
         }
         if (priceGreaterThan || priceGreaterThan == "") {
             if (!priceRegex.test(priceGreaterThan)) {
