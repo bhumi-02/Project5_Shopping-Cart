@@ -404,7 +404,7 @@ const UpdateProduct = async function (req, res) {
         return res.status(200).send({ status: true, message: "Success", data: updateData })
 
     } catch (err) {
-        res.status(500).send({ msg: "Error", error: err.message })
+        res.status(500).send({Status:false, message: "Error", error: err.message })
     }
 }
 

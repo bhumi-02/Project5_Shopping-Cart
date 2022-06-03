@@ -155,11 +155,11 @@ const updateCart = async function (req, res) {
 
         let cart = await cartModel.findById({ _id: cartId })
         if (!cart) {
-            return res.status(404).send({ status: false, msg: "Cart not found" })
+            return res.status(404).send({ status: false, message: "Cart not found" })
         }
 
         if (cart.totalPrice == "0" || cart.totalItems == "0") {
-            return res.status(400).send({ status: false, msg: "Cart is empty" })
+            return res.status(400).send({ status: false, message: "Cart is empty" })
         }
 
         let cartMatch = await cartModel.findOne({ userId: userId })
@@ -168,7 +168,7 @@ const updateCart = async function (req, res) {
         }
         let product = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!product) {
-            return res.status(404).send({ status: false, msg: "Product not found" })
+            return res.status(404).send({ status: false, message: "Product not found" })
         }
 
         if (removeProduct == 0) {
@@ -186,7 +186,7 @@ const updateCart = async function (req, res) {
                     let updateItems = cart.totalItems - 1
                     const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
 
-                    return res.status(200).send({ status: true, msg: "Succesfully Updated in the cart", data: updateItemsAndPrice })
+                    return res.status(200).send({ status: true, message: "Succesfully Updated in the cart", data: updateItemsAndPrice })
                 }
             }
 
@@ -205,19 +205,19 @@ const updateCart = async function (req, res) {
                         cart.items.splice(i, 1)
 
                         const updateItemsAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatePrice, totalItems: updateItems }, { new: true })
-                        return res.status(200).send({ status: true, msg: "Product has been removed successfully from the cart", data: updateItemsAndPrice })
+                        return res.status(200).send({ status: true, message: "Product has been removed successfully from the cart", data: updateItemsAndPrice })
 
                     }
                     else {
 
                         const updatedPrice = cart.totalPrice - (product.price * 1)
                         const updatedQuantityAndPrice = await cartModel.findOneAndUpdate({ _id: cartId }, { items: cart.items, totalPrice: updatedPrice }, { new: true })
-                        return res.status(200).send({ status: true, msg: "Quantity has been updated successfully in the cart", data: updatedQuantityAndPrice })
+                        return res.status(200).send({ status: true, message: "Quantity has been updated successfully in the cart", data: updatedQuantityAndPrice })
                     }
                 }
             }
         }
-        return res.status(404).send({ status: false, msg: "cart does not exist this prodcut" })
+        return res.status(404).send({ status: false, message: "cart does not exist this prodcut" })
 
     } catch (err) {
         return res.status(500).send({ Status: false, message: err.message })
@@ -261,16 +261,16 @@ const deleteCart = async function (req, res) {
         // To check cart is present or not
         const cartSearch = await cartModel.findOne({ userId: userId })
         if (!cartSearch) {
-            return res.status(404).send({ status: false, msg: "cart doesnot exist" })
+            return res.status(404).send({ status: false, message: "cart doesnot exist" })
         }
 
         const cartdelete = await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
-        return res.status(204).send({ status: true, msg: "Cart deleted" })
+        return res.status(204).send({ status: true, message: "Cart deleted" })
 
     }
     catch (err) {
         //console.log("This is the error :", err.message)
-        res.status(500).send({ msg: "Error", error: err.message })
+        res.status(500).send({Status:false, message: "Error", error: err.message })
     }
 }
 
