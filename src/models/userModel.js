@@ -3,7 +3,7 @@ const mongoose=require('mongoose')
 
 
 const userSchema= new mongoose.Schema({
-    fname: {type: String, required:"First Name is Required",trim:true},
+  fname: {type: String, required:"First Name is Required",trim:true},
   lname: {type: String, required:"Last Name is Required",trim:true},
   email: {type: String, required:"Email is Required", unique:true,trim:true,lowercase:true},
   profileImage: {type: String, required:"Profile image is Required",trim:true}, // s3 link

@@ -35,7 +35,7 @@ const login= async function(req,res){
             return res.status(400).send({Status: false , message:"Please enter the valid password"})  
         } 
 //--------------------------------------------------------------------------------------------//
-        body.email= body.email.toLowerCase().trim()
+        body.email= body.email
 
 //--------------------------------------------------------------------------------------------//
        
